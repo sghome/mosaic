@@ -6,6 +6,7 @@
   <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
   <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+  <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
   <style>
     #canvas-container {
       display: flex;
@@ -74,6 +75,14 @@
       var canvas = createCanvas(canvasWidth, canvasHeight); // Escala la imagen tres veces menos
       canvas.parent("canvas-container");
       loadImageSize();
+
+      // Configura el reconocimiento de gestos táctiles con Hammer.js
+      var mc = new Hammer(canvas.elt);
+      mc.get('pinch').set({ enable: true });
+      mc.on('pinch', function (event) {
+        var newZoom = zoom * event.scale;
+        zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
+      });
     }
 
     function draw() {
@@ -123,12 +132,6 @@
       img.resize(canvasWidth, canvasHeight);
       maxZoom = canvasWidth / img.width; // Establece el máximo zoom al tamaño de la imagen original
       zoom = maxZoom; // Establece el zoom inicial al máximo
-    }
-
-    function mouseWheel(event) {
-      var newZoom = zoom + event.delta / 1000;
-      zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
-      return false;
     }
   </script>
 </body>
