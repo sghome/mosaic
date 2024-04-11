@@ -55,6 +55,7 @@
     var zoom = 1; // Zoom inicial
     var maxZoom; // Variable para almacenar el máximo zoom permitido
     var minZoom = 0.33; // Zoom mínimo
+    var canvasWidth, canvasHeight;
 
     function preload() {
       img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
@@ -68,7 +69,9 @@
     }
 
     function setup() {
-      var canvas = createCanvas(1080 / 3, 1349 / 3); // Escala la imagen tres veces menos
+      canvasWidth = windowWidth / 3;
+      canvasHeight = windowHeight / 3;
+      var canvas = createCanvas(canvasWidth, canvasHeight); // Escala la imagen tres veces menos
       canvas.parent("canvas-container");
       loadImageSize();
     }
@@ -78,8 +81,8 @@
       img.loadPixels();
 
       var pixelSize = 5; // Tamaño de cada pixel
-      var offsetX = (width - img.width * zoom) / 2;
-      var offsetY = (height - img.height * zoom) / 2;
+      var offsetX = (canvasWidth - img.width * zoom) / 2;
+      var offsetY = (canvasHeight - img.height * zoom) / 2;
 
       for (var y = 0; y < img.height; y += pixelSize) {
         for (var x = 0; x < img.width; x += pixelSize) {
@@ -117,8 +120,8 @@
 
     // Función para cargar la imagen con el tamaño correcto
     function loadImageSize() {
-      img.resize(width, height);
-      maxZoom = width / img.width; // Establece el máximo zoom al tamaño de la imagen original
+      img.resize(canvasWidth, canvasHeight);
+      maxZoom = canvasWidth / img.width; // Establece el máximo zoom al tamaño de la imagen original
       zoom = maxZoom; // Establece el zoom inicial al máximo
     }
 
