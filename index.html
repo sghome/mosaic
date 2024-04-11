@@ -102,9 +102,9 @@
       function mouseWheel(event) {
         var delta = event.delta;
         var zoomIncrement = 0.01;
-        if (delta < 0) {
+        if (delta < 0 && zoom < maxZoom) {
           zoom *= hyperZoomFactor;
-        } else {
+        } else if (delta > 0 && zoom > maxZoom) {
           zoom /= hyperZoomFactor;
         }
         zoom = constrain(zoom, 0.1, hyperZoomLimit); // Limita el zoom al máximo
