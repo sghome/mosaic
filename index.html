@@ -1,10 +1,6 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-detector.js"></script>
-  <script src="https://raw.githack.com/AR-js-org/studio-backend/master/src/modules/marker/tools/gesture-handler.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
   <style>
@@ -15,124 +11,103 @@
       width: 100vw;
       height: 100vh;
       margin: 0;
-    }
-
-    a-plane {
-      width: 50vh;
-      height: 50vh;
-      position: absolute;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
+      overflow: hidden; /* Para asegurar que el canvas no se desborde en dispositivos móviles */
     }
 
     canvas {
-      display: block;
+      max-width: 100%; /* Hace que el canvas sea responsive */
+      max-height: 100%; /* Hace que el canvas sea responsive */
       border-radius: 10px;
       box-shadow: 0 1px 5px #00000099;
     }
   </style>
 </head>
-<body style="margin: 0; overflow: hidden;">
-  <a-scene
-    vr-mode-ui="enabled: false;"
-    loading-screen="enabled: false;"
-    arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-    id="scene"
-    embedded
-    gesture-detector
-  >
-    <a-entity camera></a-entity>
+<body style="margin: 0;">
+  <div id="canvas-container">
+    <script>
+      var img;
+      var emojis = [];
+      var zoom = 1; // Zoom inicial
+      var maxZoom; // Variable para almacenar el máximo zoom permitido
+      var minZoom = 0.33; // Zoom mínimo
+      var canvasWidth, canvasHeight;
 
-    <!-- Agrega el canvas como una textura en un plano -->
-    <a-plane position="0 0 -4" rotation="-90 0 0" width="5" height="5" color="#fff">
-      <a-entity id="canvas-container" material="src: #canvas"></a-entity>
-    </a-plane>
-  </a-scene>
-
-  <script>
-    var img;
-    var emojis = [];
-    var zoom = 1; // Zoom inicial
-    var maxZoom; // Variable para almacenar el máximo zoom permitido
-    var minZoom = 0.33; // Zoom mínimo
-    var canvasWidth, canvasHeight;
-
-    function preload() {
-      img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg"));
-      // Agrega el resto de las imágenes aquí de manera similar
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
-    }
-
-    function setup() {
-      canvasWidth = windowWidth / 3;
-      canvasHeight = windowHeight / 3;
-      var canvas = createCanvas(canvasWidth, canvasHeight); // Escala la imagen tres veces menos
-      canvas.parent("canvas-container");
-      loadImageSize();
-
-      // Configura el reconocimiento de gestos táctiles con Hammer.js
-      var mc = new Hammer(canvas.elt);
-      mc.get('pinch').set({ enable: true });
-      mc.on('pinch', function (event) {
-        var newZoom = zoom * event.scale;
-        zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
-      });
-    }
-
-    function draw() {
-      background(255);
-      img.loadPixels();
-
-      var pixelSize = 5; // Tamaño de cada pixel
-      var offsetX = (canvasWidth - img.width * zoom) / 2;
-      var offsetY = (canvasHeight - img.height * zoom) / 2;
-
-      for (var y = 0; y < img.height; y += pixelSize) {
-        for (var x = 0; x < img.width; x += pixelSize) {
-          var pix = getAverageColor(img, x, y, pixelSize);
-          var index = floor(map(pix, 0, 255, 0, emojis.length));
-          var mosaicImage = emojis[index];
-
-          // Dibuja la imagen de mosaico
-          image(mosaicImage, x * zoom + offsetX, y * zoom + offsetY, pixelSize * zoom, pixelSize * zoom);
-        }
+      function preload() {
+        img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
+        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg"));
+        // Agrega el resto de las imágenes aquí de manera similar
+        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
+        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
+        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
+        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
       }
-    }
 
-    // Función para obtener el color promedio de un cuadro de píxeles
-    function getAverageColor(img, x, y, size) {
-      var total = 0;
-      var count = 0;
+      function setup() {
+        canvasWidth = min(windowWidth, windowHeight) / 3; // Toma el tamaño mínimo entre el ancho y el alto de la ventana
+        canvasHeight = canvasWidth;
+        var canvas = createCanvas(canvasWidth, canvasHeight); // Crea el canvas
+        canvas.parent("canvas-container");
+        loadImageSize();
 
-      // Itera sobre los píxeles del cuadro
-      for (var j = 0; j < size; j++) {
-        for (var i = 0; i < size; i++) {
-          var index = (x + i + (y + j) * img.width) * 4;
-          var r = img.pixels[index];
-          var g = img.pixels[index + 1];
-          var b = img.pixels[index + 2];
-          var brightness = (r + g + b) / 3;
-          total += brightness;
-          count++;
+        // Configura el reconocimiento de gestos táctiles con Hammer.js
+        var mc = new Hammer(canvas.elt);
+        mc.get('pinch').set({ enable: true });
+        mc.on('pinch', function (event) {
+          var newZoom = zoom * event.scale;
+          zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
+        });
+      }
+
+      function draw() {
+        background(255);
+        img.loadPixels();
+
+        var pixelSize = 5; // Tamaño de cada pixel
+        var offsetX = (canvasWidth - img.width * zoom) / 2;
+        var offsetY = (canvasHeight - img.height * zoom) / 2;
+
+        for (var y = 0; y < img.height; y += pixelSize) {
+          for (var x = 0; x < img.width; x += pixelSize) {
+            var pix = getAverageColor(img, x, y, pixelSize);
+            var index = floor(map(pix, 0, 255, 0, emojis.length));
+            var mosaicImage = emojis[index];
+
+            // Dibuja la imagen de mosaico
+            image(mosaicImage, x * zoom + offsetX, y * zoom + offsetY, pixelSize * zoom, pixelSize * zoom);
+          }
         }
       }
 
-      // Retorna el promedio de brillo
-      return total / count;
-    }
+      // Función para obtener el color promedio de un cuadro de píxeles
+      function getAverageColor(img, x, y, size) {
+        var total = 0;
+        var count = 0;
 
-    // Función para cargar la imagen con el tamaño correcto
-    function loadImageSize() {
-      img.resize(canvasWidth, canvasHeight);
-      maxZoom = canvasWidth / img.width; // Establece el máximo zoom al tamaño de la imagen original
-      zoom = maxZoom; // Establece el zoom inicial al máximo
-    }
-  </script>
+        // Itera sobre los píxeles del cuadro
+        for (var j = 0; j < size; j++) {
+          for (var i = 0; i < size; i++) {
+            var index = (x + i + (y + j) * img.width) * 4;
+            var r = img.pixels[index];
+            var g = img.pixels[index + 1];
+            var b = img.pixels[index + 2];
+            var brightness = (r + g + b) / 3;
+            total += brightness;
+            count++;
+          }
+        }
+
+        // Retorna el promedio de brillo
+        return total / count;
+      }
+
+      // Función para cargar la imagen con el tamaño correcto
+      function loadImageSize() {
+        img.resize(canvasWidth, canvasHeight);
+        maxZoom = canvasWidth / img.width; // Establece el máximo zoom al tamaño de la imagen original
+        zoom = maxZoom; // Establece el zoom inicial al máximo
+      }
+    </script>
+  </div>
 </body>
 </html>
