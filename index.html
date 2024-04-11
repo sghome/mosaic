@@ -51,87 +51,92 @@
 </head>
 <body>
   <div class="canvas-container">
-    <div class="glow">
-      <script>
-        var img;
-        var emojis = [];
-        var zoom = 1; // Zoom inicial
-        var lastZoom = 1; // Último zoom registrado
-        var maxZoom; // Variable para almacenar el máximo zoom permitido
-
-        function preload() {
-          img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg"));
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/348264971_589673896302117_8714738300620693336_n.jpg"));
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/132792727_837456340130678_6988730526045736713_n.jpg"));
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/435476568_2211153502567144_7128119928212242381_n.jpg"));
-          emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/423807720_903706265064322_1854665927748668977_n.jpg"));
-        }
-
-        function setup() {
-          createCanvas(300, 400);
-          loadImageSize();
-          noLoop();
-          var hammertime = new Hammer(document.body);
-          hammertime.get('pinch').set({ enable: true });
-          hammertime.on('pinch', function(event) {
-            zoom *= event.scale / lastZoom;
-            zoom = constrain(zoom, 0.1, maxZoom); // Limita el zoom al máximo
-            lastZoom = event.scale;
-            redraw();
-          });
-        }
-
-        function draw() {
-          background(0);
-          img.loadPixels();
-
-          var pixelSize = 5; // Tamaño de cada pixel
-
-          for (var y = 0; y < img.height; y += pixelSize) {
-            for (var x = 0; x < img.width; x += pixelSize) {
-              var pix = getAverageColor(img, x, y, pixelSize);
-              var index = floor(map(pix, 0, 255, 0, emojis.length));
-              var mosaicImage = emojis[index];
-
-              // Dibuja la imagen de mosaico
-              image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
-            }
-          }
-        }
-
-        // Función para obtener el color promedio de un cuadro de píxeles
-        function getAverageColor(img, x, y, size) {
-          var total = 0;
-          var count = 0;
-
-          // Itera sobre los píxeles del cuadro
-          for (var j = 0; j < size; j++) {
-            for (var i = 0; i < size; i++) {
-              var index = (x + i + (y + j) * img.width) * 4;
-              var r = img.pixels[index];
-              var g = img.pixels[index + 1];
-              var b = img.pixels[index + 2];
-              var brightness = (r + g + b) / 3;
-              total += brightness;
-              count++;
-            }
-          }
-
-          // Retorna el promedio de brillo
-          return total / count;
-        }
-
-        // Función para cargar la imagen con el tamaño correcto
-        function loadImageSize() {
-          img.resize(width, height);
-          maxZoom = width / img.width; // Establece el máximo zoom al tamaño de la imagen original
-          zoom = maxZoom; // Establece el zoom inicial al máximo
-        }
-      </script>
-    </div>
+    <div class="glow"></div>
   </div>
+
+  <script>
+    var img;
+    var emojis = [];
+    var zoom = 1; // Zoom inicial
+    var lastZoom = 1; // Último zoom registrado
+    var maxZoom; // Variable para almacenar el máximo zoom permitido
+
+    function preload() {
+      img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/348264971_589673896302117_8714738300620693336_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/132792727_837456340130678_6988730526045736713_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/435476568_2211153502567144_7128119928212242381_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/423807720_903706265064322_1854665927748668977_n.jpg"));
+    }
+
+    function setup() {
+      createCanvas(300, 400);
+      loadImageSize();
+      noLoop();
+      var hammertime = new Hammer(document.body);
+      hammertime.get('pinch').set({ enable: true });
+      hammertime.on('pinch', function(event) {
+        zoom *= event.scale / lastZoom;
+        zoom = constrain(zoom, 0.1, maxZoom); // Limita el zoom al máximo
+        lastZoom = event.scale;
+        redraw();
+      });
+    }
+
+    function draw() {
+      background(0);
+      img.loadPixels();
+
+      var pixelSize = 5; // Tamaño de cada pixel
+
+      for (var y = 0; y < img.height; y += pixelSize) {
+        for (var x = 0; x < img.width; x += pixelSize) {
+          var pix = getAverageColor(img, x, y, pixelSize);
+          var index = floor(map(pix, 0, 255, 0, emojis.length));
+          var mosaicImage = emojis[index];
+
+          // Dibuja la imagen de mosaico
+          image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
+        }
+      }
+    }
+
+    // Función para obtener el color promedio de un cuadro de píxeles
+    function getAverageColor(img, x, y, size) {
+      var total = 0;
+      var count = 0;
+
+      // Itera sobre los píxeles del cuadro
+      for (var j = 0; j < size; j++) {
+        for (var i = 0; i < size; i++) {
+          var index = (x + i + (y + j) * img.width) * 4;
+          var r = img.pixels[index];
+          var g = img.pixels[index + 1];
+          var b = img.pixels[index + 2];
+          var brightness = (r + g + b) / 3;
+          total += brightness;
+          count++;
+        }
+      }
+
+      // Retorna el promedio de brillo
+      return total / count;
+    }
+
+    // Función para cargar la imagen con el tamaño correcto
+    function loadImageSize() {
+      img.resize(width, height);
+      maxZoom = width / img.width; // Establece el máximo zoom al tamaño de la imagen original
+      zoom = maxZoom; // Establece el zoom inicial al máximo
+
+      // Mueve el canvas dentro del contenedor glow
+      var canvas = document.querySelector('canvas');
+      var glowContainer = document.querySelector('.glow');
+      glowContainer.appendChild(canvas);
+    }
+  </script>
 </body>
 </html>
