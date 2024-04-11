@@ -5,24 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mosaico de Imágenes desde Dropbox</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
-  <style>
-    canvas {
-      display: block;
-      margin: 0 auto;
-      max-width: 100%;
-      height: auto;
-    }
-  </style>
 </head>
 <body>
   <script>
-    var img;
-    var emojis = [];
-    var zoom = 1; // Zoom inicial
-    var lastZoom = 1; // Último zoom registrado
-
-    // Variables para la dinámica de los píxeles
     const offsetLerpSpeed = 0.3;
     const margin = 20;
     let lastFrameTime;
@@ -34,33 +19,13 @@
     let redLayer, greenLayer, blueLayer;
 
     function preload() {
-      img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg")); // Reemplaza "URL_IMAGEN_192" con el enlace directo a la imagen correspondiente en Dropbox
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg")); // Reemplaza "URL_IMAGEN_128" con el enlace directo a la imagen correspondiente en Dropbox
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));   // Reemplaza "URL_IMAGEN_64" con el enlace directo a la imagen correspondiente en Dropbox
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/348264971_589673896302117_8714738300620693336_n.jpg"));     // Reemplaza "URL_IMAGEN_0" con el enlace directo a la imagen correspondiente en Dropbox
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/132792727_837456340130678_6988730526045736713_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/435476568_2211153502567144_7128119928212242381_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/423807720_903706265064322_1854665927748668977_n.jpg"));
-      
-      // Carga de la imagen de píxeles
-      pixelImg = loadImage('pixel-snail.gif');
+      pixelImg = loadImage('https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/pixel-snail.gif');
     }
 
     function setup() {
-      createCanvas(1080, 1349);
-      loadImageSize();
-      noLoop();
-      var hammertime = new Hammer(document.body);
-      hammertime.get('pinch').set({ enable: true });
-      hammertime.on('pinch', function(event) {
-        zoom *= event.scale / lastZoom;
-        zoom = constrain(zoom, 0.1, 10);
-        lastZoom = event.scale;
-        redraw();
-      });
+      createCanvas(windowWidth, windowHeight);
+      frameRate(60);
 
-      // Inicialización de las capas de píxeles
       redLayer = createGraphics(width, height);
       greenLayer = createGraphics(width, height);
       blueLayer = createGraphics(width, height);
@@ -199,24 +164,10 @@
 
         pos.add(vel.x, vel.y);
       });
-
-      // Dibuja la imagen principal con el zoom
-      image(img, 0, 0, img.width * zoom, img.height * zoom);
-
-      // Dibuja las capas de píxeles
-      image(redLayer, -width / 2, -height / 2);
-      image(greenLayer, -width / 2, -height / 2);
-      image(blueLayer, -width / 2, -height / 2);
     }
 
-    // Función para realizar una interpolación lineal
     function flerp(a, b, t) {
       return a * (1 - t) + b * t;
-    }
-
-    // Función para cargar la imagen con el tamaño correcto
-    function loadImageSize() {
-      img.resize(width, height);
     }
   </script>
 </body>
