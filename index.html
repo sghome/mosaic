@@ -5,18 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Mosaico de Imágenes desde Dropbox</title>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <!-- Incluye la biblioteca Hammer.js -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
   <style>
-    canvas {
-      display: block;
+    body {
+      font-family: system-ui, sans-serif;
+      perspective: 1500px;
+      background: linear-gradient(white, #efefef);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .canvas-container {
+      width: 300px;
+      height: 400px;
+      position: relative;
+      box-shadow: 0 1px 5px #00000099;
+      border-radius: 10px;
       margin: 0 auto;
-      max-width: 100%;
-      height: auto;
+      overflow: hidden;
+    }
+
+    canvas {
+      width: 100%;
+      height: 100%;
+      display: block;
+      transition-duration: 300ms;
+      transition-property: transform, box-shadow;
+      transition-timing-function: ease-out;
+    }
+
+    .canvas-container:hover {
+      box-shadow: 0 5px 20px 5px #00000044;
+    }
+
+    .glow {
+      position: absolute;
+      width: 100%;
+      height: 100%;
+      left: 0;
+      top: 0;
+      background-image: radial-gradient(circle at 50% -20%, #ffffff22, #0000000f);
     }
   </style>
 </head>
 <body>
+  <div class="canvas-container">
+    <canvas></canvas>
+    <div class="glow"></div>
+  </div>
   <script>
     var img;
     var emojis = [];
@@ -36,7 +73,7 @@
     }
 
     function setup() {
-      createCanvas(1080, 1349);
+      createCanvas(300, 400);
       loadImageSize();
       noLoop();
       var hammertime = new Hammer(document.body);
