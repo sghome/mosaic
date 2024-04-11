@@ -8,16 +8,18 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
   <style>
     #canvas-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      background-color: #f0f0f0;
-      padding: 20px;
+      position: relative;
+      width: 1080px; /* Ajusta el ancho del canvas */
+      height: 1349px; /* Ajusta la altura del canvas */
       border-radius: 20px;
       box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
+      overflow: hidden;
     }
 
     canvas {
+      position: absolute;
+      top: 0;
+      left: 0;
       border-radius: 20px;
       box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.5);
     }
@@ -34,6 +36,11 @@
       var hyperZoomLimit = 8; // Límite máximo de "hyperzoom"
       var canvasWidth = 1080;
       var canvasHeight = 1349;
+      var offsetX = 0;
+      var offsetY = 0;
+      var mouseDown = false;
+      var lastMouseX = 0;
+      var lastMouseY = 0;
 
       function preload() {
         img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
@@ -50,18 +57,10 @@
         var canvas = createCanvas(canvasWidth, canvasHeight);
         canvas.parent("canvas-container");
         loadImageSize();
-        noLoop();
-        var hammertime = new Hammer(document.body);
-        hammertime.get('pinch').set({ enable: true });
-        hammertime.on('pinch', function(event) {
-          zoom *= event.scale / lastZoom;
-          zoom = constrain(zoom, 0.1, maxZoom); // Limita el zoom al máximo
-          lastZoom = event.scale;
-          redraw();
-        });
       }
 
       function draw() {
+        translate(offsetX, offsetY); // Aplicar desplazamiento
         background(255);
         img.loadPixels();
 
@@ -104,8 +103,34 @@
       // Función para cargar la imagen con el tamaño correcto
       function loadImageSize() {
         img.resize(width, height);
-        maxZoom = width / img.width; // Establece el máximo zoom al tamaño de la imagen original
+        var maxZoom = width / img.width; // Establece el máximo zoom al tamaño de la imagen original
         zoom = maxZoom; // Establece el zoom inicial al máximo
+
+        // Event listeners para el movimiento del mouse
+        canvas.mousePressed(startDragging);
+        canvas.mouseReleased(stopDragging);
+        canvas.mouseMoved(dragCanvas);
+      }
+
+      function startDragging() {
+        if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+          mouseDown = true;
+          lastMouseX = mouseX;
+          lastMouseY = mouseY;
+        }
+      }
+
+      function stopDragging() {
+        mouseDown = false;
+      }
+
+      function dragCanvas() {
+        if (mouseDown) {
+          offsetX += mouseX - lastMouseX;
+          offsetY += mouseY - lastMouseY;
+          lastMouseX = mouseX;
+          lastMouseY = mouseY;
+        }
       }
 
       function mouseClicked() {
