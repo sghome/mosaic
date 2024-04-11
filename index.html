@@ -15,6 +15,8 @@
       border-radius: 20px;
       box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.3);
       cursor: move;
+      transform: scale(0.33);
+      transform-origin: top left;
     }
 
     canvas {
@@ -29,11 +31,7 @@
       var img;
       var emojis = [];
       var zoom = 1; // Zoom inicial
-      var lastZoom = 1; // Último zoom registrado
-      var hyperZoomFactor = 1.2; // Factor de zoom para el "hyperzoom"
-      var hyperZoomLimit = 8; // Límite máximo de "hyperzoom"
-      var canvasWidth = 1080;
-      var canvasHeight = 1349;
+      var maxZoom; // Variable para almacenar el máximo zoom permitido
 
       function preload() {
         img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
@@ -47,7 +45,7 @@
       }
 
       function setup() {
-        var canvas = createCanvas(canvasWidth, canvasHeight);
+        var canvas = createCanvas(1080, 1349);
         canvas.parent("canvas-container");
         loadImageSize();
       }
@@ -103,11 +101,11 @@
         var delta = event.delta;
         var zoomIncrement = 0.01;
         if (delta < 0 && zoom < maxZoom) {
-          zoom *= hyperZoomFactor;
+          zoom += zoomIncrement;
         } else if (delta > 0 && zoom > maxZoom) {
-          zoom /= hyperZoomFactor;
+          zoom -= zoomIncrement;
         }
-        zoom = constrain(zoom, 0.1, hyperZoomLimit); // Limita el zoom al máximo
+        zoom = constrain(zoom, 0.1, maxZoom); // Limita el zoom al máximo
         redraw();
         return false;
       }
@@ -115,8 +113,8 @@
       var offsetX, offsetY;
 
       function mousePressed() {
-        offsetX = mouseX - canvasWidth / 2;
-        offsetY = mouseY - canvasHeight / 2;
+        offsetX = mouseX;
+        offsetY = mouseY;
       }
 
       function mouseDragged() {
