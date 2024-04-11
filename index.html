@@ -78,6 +78,8 @@
       img.loadPixels();
 
       var pixelSize = 5; // Tamaño de cada pixel
+      var offsetX = (width - img.width * zoom) / 2;
+      var offsetY = (height - img.height * zoom) / 2;
 
       for (var y = 0; y < img.height; y += pixelSize) {
         for (var x = 0; x < img.width; x += pixelSize) {
@@ -86,7 +88,7 @@
           var mosaicImage = emojis[index];
 
           // Dibuja la imagen de mosaico
-          image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
+          image(mosaicImage, x * zoom + offsetX, y * zoom + offsetY, pixelSize * zoom, pixelSize * zoom);
         }
       }
     }
