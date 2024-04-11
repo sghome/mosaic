@@ -68,7 +68,7 @@
     }
 
     function setup() {
-      var canvas = createCanvas(1080, 1349);
+      var canvas = createCanvas(1080 / 3, 1349 / 3); // Escala la imagen tres veces menos
       canvas.parent("canvas-container");
       loadImageSize();
     }
@@ -121,8 +121,8 @@
     }
 
     function mouseWheel(event) {
-      zoom += event.delta / 500;
-      zoom = constrain(zoom, minZoom, maxZoom); // Limita el zoom al rango definido
+      var newZoom = zoom + event.delta / 1000;
+      zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
       return false;
     }
   </script>
