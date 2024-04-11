@@ -7,73 +7,36 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/hammer.js/2.0.8/hammer.min.js"></script>
   <style>
-    body {
-      font-family: system-ui, sans-serif;
-      perspective: 1500px;
-      background: linear-gradient(white, #efefef);
-      display: flex;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .canvas-container {
-      width: 300px;
-      height: 400px;
-      position: relative;
-      box-shadow: 0 1px 5px #00000099;
-      border-radius: 10px;
-      margin: 0 auto;
-      overflow: hidden;
-    }
-
     canvas {
-      width: 100%;
-      height: 100%;
       display: block;
-      transition-duration: 300ms;
-      transition-property: transform, box-shadow;
-      transition-timing-function: ease-out;
-    }
-
-    .canvas-container:hover {
-      box-shadow: 0 5px 20px 5px #00000044;
-    }
-
-    .glow {
-      position: absolute;
-      width: 100%;
-      height: 100%;
-      left: 0;
-      top: 0;
-      background-image: radial-gradient(circle at 50% -20%, #ffffff22, #0000000f);
+      margin: 0 auto;
+      max-width: 100%;
+      height: auto;
     }
   </style>
 </head>
 <body>
-  <div class="canvas-container">
-    <div class="glow"></div>
-  </div>
-
   <script>
     var img;
     var emojis = [];
     var zoom = 1; // Zoom inicial
     var lastZoom = 1; // Último zoom registrado
-    var maxZoom; // Variable para almacenar el máximo zoom permitido
+    var hyperZoomFactor = 2; // Factor de zoom para el "hyperzoom"
+    var hyperZoomLimit = 8; // Límite máximo de "hyperzoom"
 
     function preload() {
       img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg")); // Reemplaza "URL_IMAGEN_192" con el enlace directo a la imagen correspondiente en Dropbox
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg")); // Reemplaza "URL_IMAGEN_128" con el enlace directo a la imagen correspondiente en Dropbox
+      // Agrega el resto de las imágenes aquí de manera similar
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
+      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
       emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/348264971_589673896302117_8714738300620693336_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/132792727_837456340130678_6988730526045736713_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/435476568_2211153502567144_7128119928212242381_n.jpg"));
-      emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/423807720_903706265064322_1854665927748668977_n.jpg"));
     }
 
     function setup() {
-      createCanvas(300, 400);
+      createCanvas(1080, 1349);
       loadImageSize();
       noLoop();
       var hammertime = new Hammer(document.body);
@@ -131,11 +94,13 @@
       img.resize(width, height);
       maxZoom = width / img.width; // Establece el máximo zoom al tamaño de la imagen original
       zoom = maxZoom; // Establece el zoom inicial al máximo
+    }
 
-      // Mueve el canvas dentro del contenedor glow
-      var canvas = document.querySelector('canvas');
-      var glowContainer = document.querySelector('.glow');
-      glowContainer.appendChild(canvas);
+    function mouseClicked() {
+      if (zoom < hyperZoomLimit) {
+        zoom *= hyperZoomFactor;
+        redraw();
+      }
     }
   </script>
 </body>
