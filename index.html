@@ -47,8 +47,8 @@
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
         }
 
-        .a-enter-vr-button {
-            display: none; /* Ocultar el botón Enter VR */
+        .a-enter-vr-button, .a-enter-ar-button {
+            display: none; /* Ocultar los botones Enter VR y AR */
         }
     </style>
 </head>
@@ -183,11 +183,19 @@
                 isDragging = false;
             }
 
-            // Eliminar el canvas con la clase "a-grab-cursor"
+            // Eliminar el texto "Loading..."
             window.onload = function() {
-                var grabCanvas = document.querySelector('.a-grab-cursor');
-                if (grabCanvas) {
-                    grabCanvas.parentNode.removeChild(grabCanvas);
+                var loadingText = document.querySelector('.a-canvas-loading');
+                if (loadingText) {
+                    loadingText.parentNode.removeChild(loadingText);
+                }
+            };
+
+            // Eliminar el botón de AR
+            window.onload = function() {
+                var arButton = document.querySelector('.a-enter-ar-button');
+                if (arButton) {
+                    arButton.parentNode.removeChild(arButton);
                 }
             };
         </script>
