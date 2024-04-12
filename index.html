@@ -71,7 +71,14 @@
                         let index = floor(map(pix, 0, 255, 0, emojis.length));
                         let mosaicImage = emojis[index];
 
-                        image(mosaicImage, (x - img.width / 2) * zoom + canvasWidth / 2, (y - img.height / 2) * zoom + canvasHeight / 2, pixelSize * zoom, pixelSize * zoom);
+                        let imgX = (x - img.width / 2) * zoom + canvasWidth / 2;
+                        let imgY = (y - img.height / 2) * zoom + canvasHeight / 2;
+                        let imgSize = pixelSize * zoom;
+
+                        // Verificar si la imagen está dentro del canvas
+                        if (imgX + imgSize > 0 && imgX < canvasWidth && imgY + imgSize > 0 && imgY < canvasHeight) {
+                            image(mosaicImage, imgX, imgY, imgSize, imgSize);
+                        }
                     }
                 }
             }
