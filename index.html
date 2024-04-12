@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almagua AR</title>
+    <title>Zoom con Scroll y Cámara Posterior</title>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
@@ -62,7 +62,11 @@
                 canvas = createCanvas(canvasWidth, canvasHeight);
                 canvas.parent("canvas-container");
                 loadImageSize();
-                maxZoom = 18; // Establece el máximo zoom permitido
+                maxZoom = 3; // Establece el máximo zoom permitido
+
+                // Ajustar offsetX y offsetY para centrar la imagen
+                offsetX = (canvasWidth - img.width * zoom) / 2;
+                offsetY = (canvasHeight - img.height * zoom) / 2;
             }
 
             function draw() {
@@ -132,14 +136,16 @@
             }
 
             function mousePressed() {
+                // Iniciar el arrastre de la imagen al presionar el mouse
                 if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                    isDragging = true;
                     lastMouseX = mouseX;
                     lastMouseY = mouseY;
-                    isDragging = true;
                 }
             }
 
             function mouseDragged() {
+                // Actualizar el desplazamiento de la imagen mientras se arrastra el mouse
                 if (isDragging) {
                     let deltaX = mouseX - lastMouseX;
                     let deltaY = mouseY - lastMouseY;
@@ -151,6 +157,7 @@
             }
 
             function mouseReleased() {
+                // Detener el arrastre de la imagen al soltar el mouse
                 isDragging = false;
             }
         </script>
