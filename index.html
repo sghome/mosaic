@@ -6,6 +6,7 @@
     <title>Zoom con Scroll y Cámara Posterior</title>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -53,131 +54,156 @@
     </style>
 </head>
 <body>
-    <a-scene id="canvas-container" id="glow" style="height: 100%; width: 100%;">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-        <script>
-            let img;
-            let emojis = [];
-            let zoom = 1; // Zoom inicial
-            let minZoom = 0.5; // Zoom mínimo
-            let maxZoom = 5; // Zoom máximo
-            let canvasWidth, canvasHeight;
-            let canvas; // Variable para almacenar el canvas
-            let offsetX = 0; // Desplazamiento X de la imagen
-            let offsetY = 0; // Desplazamiento Y de la imagen
-            let lastMouseX; // Última posición X del mouse al arrastrar
-            let lastMouseY; // Última posición Y del mouse al arrastrar
-            let isDragging = false; // Indicador de si se está arrastrando
+    <div id="canvas-container">
+        <canvas id="defaultCanvas0" class="p5Canvas" width="939" height="1173" style="width: 939.2px; height: 1173.13px;"></canvas>
+    </div>
+    <script>
+        let img;
+        let emojis = [];
+        let zoom = 1; // Zoom inicial
+        let minZoom = 0.5; // Zoom mínimo
+        let maxZoom = 2; // Zoom máximo
+        let canvasWidth, canvasHeight;
+        let offsetX = 0; // Desplazamiento X de la imagen
+        let offsetY = 0; // Desplazamiento Y de la imagen
+        let lastMouseX; // Última posición X del mouse al arrastrar
+        let lastMouseY; // Última posición Y del mouse al arrastrar
+        let isDragging = false; // Indicador de si se está arrastrando
+        let isCanvasClicked = false;
 
-            function preload() {
-                img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
-                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
-                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
-                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
-                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
+        function preload() {
+            img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
+            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
+            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
+            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
+            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
+        }
+
+        function setup() {
+            canvasWidth = min(windowWidth, windowHeight) * 0.8; // Actualizar el tamaño del canvas al cambiar el tamaño de la ventana
+            canvasHeight = canvasWidth;
+            createCanvas(canvasWidth, canvasHeight).parent("canvas-container");
+            loadImageSize();
+        }
+
+        function draw() {
+            background(255);
+            img.loadPixels();
+            let pixelSize = 5;
+
+            // Calcular el desplazamiento necesario para centrar la imagen
+            offsetX = constrain(offsetX, -(img.width * zoom - canvasWidth), 0);
+            offsetY = constrain(offsetY, -(img.height * zoom - canvasHeight), 0);
+
+            for (let y = 0; y < img.height; y += pixelSize) {
+                for (let x = 0; x < img.width; x += pixelSize) {
+                    let pix = getAverageColor(img, x, y, pixelSize);
+                    let index = floor(map(pix, 0, 255, 0, emojis.length));
+                    let mosaicImage = emojis[index];
+
+                    // Ajustar la posición para centrar la imagen y considerar el desplazamiento
+                    let posX = x * zoom + offsetX;
+                    let posY = y * zoom + offsetY;
+
+                    image(mosaicImage, posX, posY, pixelSize * zoom, pixelSize * zoom);
+                }
             }
+        }
 
-            function setup() {
-                calculateCanvasSize(); // Calcular el tamaño del canvas
-                canvas = createCanvas(canvasWidth, canvasHeight);
-                canvas.parent("canvas-container");
-            }
+        function getAverageColor(img, x, y, size) {
+            let total = 0;
+            let count = 0;
 
-            function draw() {
-                background(255);
-                img.loadPixels();
-                let pixelSize = 5;
-
-                for (let y = 0; y < img.height; y += pixelSize) {
-                    for (let x = 0; x < img.width; x += pixelSize) {
-                        let pix = getAverageColor(img, x, y, pixelSize);
-                        let index = floor(map(pix, 0, 255, 0, emojis.length));
-                        let mosaicImage = emojis[index];
-
-                        let posX = x * zoom + offsetX;
-                        let posY = y * zoom + offsetY;
-
-                        image(mosaicImage, posX, posY, pixelSize * zoom, pixelSize * zoom);
-                    }
+            for (let j = 0; j < size; j++) {
+                for (let i = 0; i < size; i++) {
+                    let index = (x + i + (y + j) * img.width) * 4;
+                    let r = img.pixels[index];
+                    let g = img.pixels[index + 1];
+                    let b = img.pixels[index + 2];
+                    total += (r + g + b) / 3;
+                    count++;
                 }
             }
 
-            function getAverageColor(img, x, y, size) {
-                let total = 0;
-                let count = 0;
+            return total / count;
+        }
 
-                for (let j = 0; j < size; j++) {
-                    for (let i = 0; i < size; i++) {
-                        let index = (x + i + (y + j) * img.width) * 4;
-                        let r = img.pixels[index];
-                        let g = img.pixels[index + 1];
-                        let b = img.pixels[index + 2];
-                        total += (r + g + b) / 3;
-                        count++;
-                    }
-                }
-
-                return total / count;
+        function loadImageSize() {
+            img.loadPixels();
+            let imgRatio = img.width / img.height;
+            if (imgRatio > 1) {
+                canvasHeight = canvasWidth / imgRatio;
+            } else {
+                canvasWidth = canvasHeight * imgRatio;
             }
+            resizeCanvas(canvasWidth, canvasHeight);
+        }
 
-            function mousePressed() {
+        function windowResized() {
+            canvasWidth = min(windowWidth, windowHeight) * 0.8; // Actualizar el tamaño del canvas al cambiar el tamaño de la ventana
+            loadImageSize();
+        }
+
+        function mousePressed() {
+            // Iniciar el arrastre de la imagen al presionar el mouse
+            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                isDragging = true;
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+            }
+        }
+
+        function mouseDragged() {
+            // Actualizar el desplazamiento de la imagen mientras se arrastra el mouse
+            if (isDragging) {
+                let deltaX = mouseX - lastMouseX;
+                let deltaY = mouseY - lastMouseY;
+                offsetX += deltaX;
+                offsetY += deltaY;
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+            }
+        }
+
+        function mouseReleased() {
+            // Detener el arrastre de la imagen al soltar el mouse
+            isDragging = false;
+        }
+
+        function mouseWheel(event) {
+            if (isCanvasClicked) {
                 if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                    isDragging = true;
-                    lastMouseX = mouseX;
-                    lastMouseY = mouseY;
-                }
-            }
-
-            function mouseDragged() {
-                if (isDragging) {
-                    let deltaX = mouseX - lastMouseX;
-                    let deltaY = mouseY - lastMouseY;
-                    offsetX += deltaX;
-                    offsetY += deltaY;
-                    lastMouseX = mouseX;
-                    lastMouseY = mouseY;
-                }
-            }
-
-            function mouseReleased() {
-                isDragging = false;
-            }
-
-            function mouseWheel(event) {
-                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                    let delta = event.delta;
-                    zoom += delta * 0.01;
+                    zoom -= event.delta * 0.01;
                     zoom = constrain(zoom, minZoom, maxZoom);
-                    return false; // Evita el desplazamiento predeterminado de la página
+                    return false;
                 }
             }
+        }
 
-            function calculateCanvasSize() {
-                let baseSize = min(windowWidth, windowHeight) * 0.8; // Tamaño base adecuado para dispositivos móviles
-                let aspectRatio = img.width / img.height;
+        function touchStarted() {
+            isCanvasClicked = true;
+        }
 
-                if (windowWidth > windowHeight) {
-                    canvasWidth = baseSize;
-                    canvasHeight = baseSize / aspectRatio;
-                } else {
-                    canvasHeight = baseSize;
-                    canvasWidth = baseSize * aspectRatio;
-                }
+        function touchEnded() {
+            isCanvasClicked = false;
+        }
 
-                // Ajustar zoom inicial
-                zoom = min(canvasWidth / img.width, canvasHeight / img.height);
-                
-                // Ajustar offset para centrar la imagen
-                offsetX = (canvasWidth - img.width * zoom) / 2;
-                offsetY = (canvasHeight - img.height * zoom) / 2;
+        // Eliminar el texto "Loading..."
+        window.onload = function() {
+            var loadingText = document.querySelector('.a-canvas-loading');
+            if (loadingText) {
+                loadingText.parentNode.removeChild(loadingText);
             }
+        };
 
-            function windowResized() {
-                calculateCanvasSize();
-                resizeCanvas(canvasWidth, canvasHeight);
+        // Eliminar el botón de AR
+        window.onload = function() {
+            var arButton = document.querySelector('.a-enter-ar-button');
+            if (arButton) {
+                arButton.parentNode.removeChild(arButton);
             }
-        </script>
-    </a-scene>
+        };
+    </script>
 </body>
 </html>
