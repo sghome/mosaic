@@ -52,6 +52,7 @@
         <script>
             let img;
             let emojis = [];
+            let emojiPositions = [];
             let zoom = 0.5; // Zoom inicial
             let minZoom = 0.5; // Zoom mínimo
             let maxZoom; // Zoom máximo
@@ -83,6 +84,11 @@
                 // Ajustar offsetX y offsetY para centrar la imagen
                 offsetX = (canvasWidth - img.width * zoom) / 2;
                 offsetY = (canvasHeight - img.height * zoom) / 2;
+
+                // Inicializar posiciones de emojis
+                for (let i = 0; i < emojis.length; i++) {
+                    emojiPositions.push(createVector(random(canvasWidth), random(canvasHeight)));
+                }
             }
 
             function draw() {
@@ -104,7 +110,16 @@
                         let posX = x * zoom + offsetX;
                         let posY = y * zoom + offsetY;
 
-                        image(mosaicImage, posX, posY, pixelSize * zoom, pixelSize * zoom);
+                        // Desplazar emojis
+                        let emojiPos = emojiPositions[index];
+                        emojiPos.x += random(-1, 1);
+                        emojiPos.y += random(-1, 1);
+
+                        // Wrap around canvas
+                        emojiPos.x = (emojiPos.x + canvasWidth) % canvasWidth;
+                        emojiPos.y = (emojiPos.y + canvasHeight) % canvasHeight;
+
+                        image(mosaicImage, emojiPos.x, emojiPos.y, pixelSize * zoom, pixelSize * zoom);
                     }
                 }
             }
