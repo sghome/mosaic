@@ -59,6 +59,8 @@
             let img;
             let emojis = [];
             let zoom = 1; // Zoom inicial
+            let minZoom = 0.5; // Zoom mínimo
+            let maxZoom = 5; // Zoom máximo
             let canvasWidth, canvasHeight;
             let canvas; // Variable para almacenar el canvas
             let offsetX = 0; // Desplazamiento X de la imagen
@@ -140,6 +142,15 @@
 
             function mouseReleased() {
                 isDragging = false;
+            }
+
+            function mouseWheel(event) {
+                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                    let delta = event.delta;
+                    zoom += delta * 0.01;
+                    zoom = constrain(zoom, minZoom, maxZoom);
+                    return false; // Evita el desplazamiento predeterminado de la página
+                }
             }
 
             function calculateCanvasSize() {
