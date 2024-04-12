@@ -25,42 +25,44 @@
         }
 
         #content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
             height: 100%;
-            position: relative;
+            min-width: 50vw; /* Establece un ancho mínimo para el contenedor */
+            min-height: 50vh; /* Establece una altura mínima para el contenedor */
         }
 
-        canvas.p5Canvas {
+        canvas {
             max-width: 100%;
             max-height: 100%;
             border-radius: 10px;
             box-shadow: 0 1px 5px #00000099;
-            pointer-events: none;
-            display: block; /* Asegura que el canvas sea un elemento de bloque */
-            margin: auto; /* Centra el canvas horizontalmente */
+            pointer-events: none; /* Evitar eventos de clic/touch en el canvas */
+        }
+
+        #content canvas {
+            max-width: 100%;
+            max-height: 100%;
         }
     </style>
 </head>
 <body>
-    <div id="canvas-container">
-        <a-scene
-            vr-mode-ui="enabled: false;"
-            loading-screen="enabled: false;"
-            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-            id="scene"
-            embedded
-            gesture-detector
-        >
-            <a-entity environment="preset: forest"></a-entity>
-            <a-marker-camera>
-                <!-- Contenido del marker -->
-                <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
-                    <!-- Contenido de la cámara posterior -->
-                
-                    
-                </a-entity>
-            </a-marker-camera>
-        </a-scene>
+    <a-scene vr-mode-ui="enabled: false;" loading-screen="enabled: false;" arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;" id="scene" embedded="" gesture-detector="" inspector="" keyboard-shortcuts="" screenshot="" device-orientation-permission-ui="">
+        <a-entity environment="preset: forest"></a-entity>
+        <a-marker-camera material="" arjs-anchor="" camera="">
+            <!-- Contenido del marker -->
+            <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
+                <!-- Contenido de la cámara posterior -->
+                <div id="canvas-container">
+                    <canvas id="defaultCanvas0" class="p5Canvas" width="556" height="694" style="width: 278.073px; height: 347.333px;"></canvas>
+                </div>
+            </a-entity>
+        </a-marker-camera>
+        <a-entity camera="" position="" wasd-controls="" rotation="" look-controls="" aframe-injected=""></a-entity>
+        <a-entity light="" data-aframe-default-light="" aframe-injected=""></a-entity>
+        <a-entity light="" position="" data-aframe-default-light="" aframe-injected=""></a-entity>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
             let img;
@@ -83,7 +85,7 @@
                 canvasWidth = min(windowWidth, windowHeight) / 3;
                 canvasHeight = canvasWidth;
                 let canvas = createCanvas(canvasWidth, canvasHeight);
-                canvas.parent("content");
+                canvas.parent("canvas-container");
                 loadImageSize();
                 maxZoom = 3; // Establece el máximo zoom permitido
             }
@@ -146,6 +148,6 @@
                 }
             }
         </script>
-    </div>
+    </a-scene>
 </body>
 </html>
