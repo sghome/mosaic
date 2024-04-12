@@ -43,6 +43,8 @@
         }
 
         #content canvas {
+            width: 278.073px; /* Mismo ancho que el canvas original */
+            height: 347.333px; /* Mismo alto que el canvas original */
             max-width: 100%;
             max-height: 100%;
         }
@@ -53,12 +55,9 @@
         <a-entity environment="preset: forest"></a-entity>
         <a-marker-camera material="" arjs-anchor="" camera="">
             <!-- Contenido del marker -->
-            <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
-                <!-- Contenido de la cámara posterior -->
-                <div id="canvas-container">
-                    <canvas id="defaultCanvas0" class="p5Canvas" width="556" height="694" style="width: 278.073px; height: 347.333px;"></canvas>
-                </div>
-            </a-entity>
+            <div id="canvas-container">
+                <canvas id="defaultCanvas0" class="p5Canvas" width="556" height="694" style="width: 278.073px; height: 347.333px;"></canvas>
+            </div>
         </a-marker-camera>
         <a-entity camera="" position="" wasd-controls="" rotation="" look-controls="" aframe-injected=""></a-entity>
         <a-entity light="" data-aframe-default-light="" aframe-injected=""></a-entity>
