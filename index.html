@@ -14,57 +14,108 @@
             height: 100%;
         }
 
-        #canvas-container {
-            position: relative; /* Establecemos el contenedor como relativo */
+        #content {
+            display: flex;
+            justify-content: center;
+            align-items: center;
             width: 100%;
             height: 100%;
+            overflow: hidden; /* Agregamos overflow hidden para evitar que el canvas se desborde */
         }
 
-        #defaultCanvas0 {
+        canvas {
             max-width: 100%;
             max-height: 100%;
             border-radius: 10px;
             box-shadow: 0 1px 5px #00000099;
             pointer-events: none; /* Evitar eventos de clic/touch en el canvas */
-            position: absolute; /* Establecemos el canvas como absoluto */
-            top: 50%; /* Lo posicionamos en el 50% del contenedor verticalmente */
-            left: 50%; /* Lo posicionamos en el 50% del contenedor horizontalmente */
-            transform: translate(-50%, -50%); /* Centramos el canvas */
-            z-index: 1; /* Aseguramos que esté por encima del fondo de AR */
-        }
-
-        a-scene {
-            width: 100%;
-            height: 100%;
-        }
-
-        canvas.a-canvas {
-            position: absolute; /* Establecemos el canvas de AR como absoluto */
-            top: 0;
-            left: 0;
         }
     </style>
 </head>
 <body>
-    <div id="canvas-container">
-        <a-scene
-            vr-mode-ui="enabled: false;"
-            loading-screen="enabled: false;"
-            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-            id="scene"
-            embedded
-            gesture-detector
-        >
-            <a-entity camera></a-entity>
-            <a-entity environment="preset: forest"></a-entity>
-            <a-marker-camera>
-                <!-- Contenido del marker -->
-            </a-marker-camera>
-        </a-scene>
-        <canvas id="defaultCanvas0" class="p5Canvas"></canvas>
+    <div id="content">
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
-            // Tu código de p5.js aquí
+            let img;
+            let emojis = [];
+            let zoom = 1; // Zoom inicial
+            let minZoom = 0.5; // Zoom mínimo
+            let maxZoom; // Zoom máximo
+            let canvasWidth, canvasHeight;
+
+            function preload() {
+                img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
+            }
+
+            function setup() {
+                canvasWidth = min(windowWidth, windowHeight) / 3;
+                canvasHeight = canvasWidth;
+                let canvas = createCanvas(canvasWidth, canvasHeight);
+                canvas.parent("content");
+                loadImageSize();
+                maxZoom = 3; // Establece el máximo zoom permitido
+            }
+
+            function draw() {
+                background(255);
+                img.loadPixels();
+                let pixelSize = 5;
+
+                for (let y = 0; y < img.height; y += pixelSize) {
+                    for (let x = 0; x < img.width; x += pixelSize) {
+                        let pix = getAverageColor(img, x, y, pixelSize);
+                        let index = floor(map(pix, 0, 255, 0, emojis.length));
+                        let mosaicImage = emojis[index];
+
+                        image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
+                    }
+                }
+            }
+
+            function getAverageColor(img, x, y, size) {
+                let total = 0;
+                let count = 0;
+
+                for (let j = 0; j < size; j++) {
+                    for (let i = 0; i < size; i++) {
+                        let index = (x + i + (y + j) * img.width) * 4;
+                        let r = img.pixels[index];
+                        let g = img.pixels[index + 1];
+                        let b = img.pixels[index + 2];
+                        total += (r + g + b) / 3;
+                        count++;
+                    }
+                }
+
+                return total / count;
+            }
+
+            function loadImageSize() {
+                img.loadPixels();
+                let imgRatio = img.width / img.height;
+                if (imgRatio > 1) {
+                    canvasHeight = canvasWidth / imgRatio;
+                } else {
+                    canvasWidth = canvasHeight * imgRatio;
+                }
+                resizeCanvas(canvasWidth, canvasHeight);
+            }
+
+            function windowResized() {
+                canvasWidth = min(windowWidth, windowHeight) / 3;
+                loadImageSize();
+            }
+
+            function mouseWheel(event) {
+                zoom -= event.delta * 0.01;
+                zoom = constrain(zoom, minZoom, maxZoom);
+                return false;
+            }
         </script>
     </div>
 </body>
