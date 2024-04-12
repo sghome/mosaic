@@ -12,30 +12,56 @@
             padding: 0;
             width: 100%;
             height: 100%;
-            display: flex;
-            justify-content: center;
-            align-items: center;
         }
 
-        #content {
-            position: relative;
+        #canvas-container {
+            position: relative; /* Establecemos el contenedor como relativo */
+            width: 100%;
+            height: 100%;
         }
 
-        canvas {
+        #defaultCanvas0 {
             max-width: 100%;
             max-height: 100%;
             border-radius: 10px;
             box-shadow: 0 1px 5px #00000099;
             pointer-events: none; /* Evitar eventos de clic/touch en el canvas */
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
+            position: absolute; /* Establecemos el canvas como absoluto */
+            top: 50%; /* Lo posicionamos en el 50% del contenedor verticalmente */
+            left: 50%; /* Lo posicionamos en el 50% del contenedor horizontalmente */
+            transform: translate(-50%, -50%); /* Centramos el canvas */
+            z-index: 1; /* Aseguramos que esté por encima del fondo de AR */
+        }
+
+        a-scene {
+            width: 100%;
+            height: 100%;
+        }
+
+        canvas.a-canvas {
+            position: absolute; /* Establecemos el canvas de AR como absoluto */
+            top: 0;
+            left: 0;
         }
     </style>
 </head>
 <body>
-    <div id="content">
+    <div id="canvas-container">
+        <a-scene
+            vr-mode-ui="enabled: false;"
+            loading-screen="enabled: false;"
+            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+            id="scene"
+            embedded
+            gesture-detector
+        >
+            <a-entity camera></a-entity>
+            <a-entity environment="preset: forest"></a-entity>
+            <a-marker-camera>
+                <!-- Contenido del marker -->
+            </a-marker-camera>
+        </a-scene>
+        <canvas id="defaultCanvas0" class="p5Canvas"></canvas>
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
             let img;
@@ -58,7 +84,7 @@
                 canvasWidth = min(windowWidth, windowHeight) / 3;
                 canvasHeight = canvasWidth;
                 let canvas = createCanvas(canvasWidth, canvasHeight);
-                canvas.parent("content");
+                canvas.parent("canvas-container");
                 loadImageSize();
                 maxZoom = 3; // Establece el máximo zoom permitido
             }
@@ -114,9 +140,11 @@
             }
 
             function mouseWheel(event) {
-                zoom -= event.delta * 0.01;
-                zoom = constrain(zoom, minZoom, maxZoom);
-                return false;
+                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                    zoom -= event.delta * 0.01;
+                    zoom = constrain(zoom, minZoom, maxZoom);
+                    return false;
+                }
             }
         </script>
     </div>
