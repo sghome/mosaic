@@ -40,9 +40,10 @@
       var img;
       var emojis = [];
       var zoom = 1; // Zoom inicial
+      var minZoom = 0.5; // Zoom mínimo
       var maxZoom; // Variable para almacenar el máximo zoom permitido
-      var minZoom = 0.33; // Zoom mínimo
       var canvasWidth, canvasHeight;
+      var mc;
 
       function preload() {
         img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
@@ -63,16 +64,17 @@
         loadImageSize();
 
         // Configura el reconocimiento de gestos táctiles con Hammer.js
-        var mc = new Hammer(canvas.elt);
+        mc = new Hammer(canvas.elt);
         mc.get('pinch').set({ enable: true });
         mc.on('pinch', function (event) {
           var newZoom = zoom * event.scale;
           zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
+          return false; // Evita el comportamiento predeterminado del gesto
         });
 
         // Inicializa el fondo de la cámara web
         var video = document.getElementById('ar-video');
-        navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function (stream) {
           video.srcObject = stream;
           video.play();
         }).catch(function (err) {
@@ -118,15 +120,29 @@
           }
         }
 
-        // Retorna el promedio de brillo
+        // Retorna el color promedio del cuadro
         return total / count;
       }
 
-      // Función para cargar la imagen con el tamaño correcto
+      // Función para cargar la imagen conociendo su tamaño
       function loadImageSize() {
-        img.resize(canvasWidth, canvasHeight);
-        maxZoom = canvasWidth / img.width; // Establece el máximo zoom al tamaño de la imagen original
-        zoom = maxZoom; // Establece el zoom inicial al máximo
+        maxZoom = 3; // Establece el máximo zoom permitido
+        img.loadPixels();
+        var imgRatio = img.width / img.height;
+        if (imgRatio > 1) {
+          // La imagen es más ancha que alta
+          canvasHeight = canvasWidth / imgRatio;
+        } else {
+          // La imagen es más alta que ancha
+          canvasWidth = canvasHeight * imgRatio;
+        }
+        resizeCanvas(canvasWidth, canvasHeight);
+      }
+
+      // Función para redimensionar el canvas cuando cambia el tamaño de la ventana
+      function windowResized() {
+        canvasWidth = min(windowWidth, windowHeight) / 3; // Toma el tamaño mínimo entre el ancho y el alto de la ventana
+        loadImageSize();
       }
     </script>
   </div>
