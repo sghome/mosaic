@@ -50,10 +50,12 @@
                 <!-- Contenido del marker -->
                 <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
                     <!-- Contenido de la cámara posterior -->
+                    <canvas id="defaultCanvas0"></canvas>
                 </a-entity>
             </a-marker-camera>
         </a-scene>
 
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
             let img;
             let emojis = [];
