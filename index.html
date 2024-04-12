@@ -24,11 +24,10 @@
             position: relative;
         }
 
-           canvas {
+        canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
         }
-     
     </style>
 </head>
 <body>
@@ -37,7 +36,7 @@
         <script>
             let img;
             let emojis = [];
-            let zoom = 2; // Zoom inicial
+            let zoom = 1; // Zoom inicial
             let minZoom = 0.5; // Zoom mínimo
             let maxZoom; // Zoom máximo
             let canvasWidth, canvasHeight;
@@ -66,13 +65,21 @@
                 img.loadPixels();
                 let pixelSize = 5;
 
+                // Calcular el desplazamiento necesario para centrar la imagen
+                let offsetX = (canvasWidth - img.width * zoom) / 2;
+                let offsetY = (canvasHeight - img.height * zoom) / 2;
+
                 for (let y = 0; y < img.height; y += pixelSize) {
                     for (let x = 0; x < img.width; x += pixelSize) {
                         let pix = getAverageColor(img, x, y, pixelSize);
                         let index = floor(map(pix, 0, 255, 0, emojis.length));
                         let mosaicImage = emojis[index];
 
-                        image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
+                        // Ajustar la posición para centrar la imagen
+                        let posX = x * zoom + offsetX;
+                        let posY = y * zoom + offsetY;
+
+                        image(mosaicImage, posX, posY, pixelSize * zoom, pixelSize * zoom);
                     }
                 }
             }
