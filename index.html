@@ -27,100 +27,97 @@
         canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
-            background: transparent; /* Hacer el fondo del canvas transparente */
         }
     </style>
 </head>
 <body>
-    <a-scene id="canvas-container" embedded arjs="sourceType: webcam;">
-        <!-- Código de la escena A-Frame -->
+    <a-scene id="canvas-container" style="height: 100%; width: 100%;">
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
+        <script>
+            let img;
+            let emojis = [];
+            let zoom = 1; // Zoom inicial
+            let minZoom = 0.5; // Zoom mínimo
+            let maxZoom; // Zoom máximo
+            let canvasWidth, canvasHeight;
+            let canvas; // Variable para almacenar el canvas
+
+            function preload() {
+                img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
+            }
+
+            function setup() {
+                canvasWidth = min(windowWidth, windowHeight) / 3;
+                canvasHeight = canvasWidth;
+                canvas = createCanvas(canvasWidth, canvasHeight);
+                canvas.parent("canvas-container");
+                loadImageSize();
+                maxZoom = 3; // Establece el máximo zoom permitido
+            }
+
+            function draw() {
+                background(255);
+                img.loadPixels();
+                let pixelSize = 5;
+
+                for (let y = 0; y < img.height; y += pixelSize) {
+                    for (let x = 0; x < img.width; x += pixelSize) {
+                        let pix = getAverageColor(img, x, y, pixelSize);
+                        let index = floor(map(pix, 0, 255, 0, emojis.length));
+                        let mosaicImage = emojis[index];
+
+                        image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
+                    }
+                }
+            }
+
+            function getAverageColor(img, x, y, size) {
+                let total = 0;
+                let count = 0;
+
+                for (let j = 0; j < size; j++) {
+                    for (let i = 0; i < size; i++) {
+                        let index = (x + i + (y + j) * img.width) * 4;
+                        let r = img.pixels[index];
+                        let g = img.pixels[index + 1];
+                        let b = img.pixels[index + 2];
+                        total += (r + g + b) / 3;
+                        count++;
+                    }
+                }
+
+                return total / count;
+            }
+
+            function loadImageSize() {
+                img.loadPixels();
+                let imgRatio = img.width / img.height;
+                if (imgRatio > 1) {
+                    canvasHeight = canvasWidth / imgRatio;
+                } else {
+                    canvasWidth = canvasHeight * imgRatio;
+                }
+                resizeCanvas(canvasWidth, canvasHeight);
+            }
+
+            function windowResized() {
+                canvasWidth = min(windowWidth, windowHeight) / 3;
+                loadImageSize();
+            }
+
+            function mouseWheel(event) {
+                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                    zoom -= event.delta * 0.01;
+                    zoom = constrain(zoom, minZoom, maxZoom);
+                    return false;
+                }
+            }
+        </script>
     </a-scene>
- 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-    <script>
-        let img;
-        let emojis = [];
-        let zoom = 1; // Zoom inicial
-        let minZoom = 0.5; // Zoom mínimo
-        let maxZoom; // Zoom máximo
-        let canvasWidth, canvasHeight;
-        let canvas; // Variable para almacenar el canvas
-
-        function preload() {
-            img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
-            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
-            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
-            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
-            emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
-        }
-
-        function setup() {
-            canvasWidth = min(windowWidth, windowHeight) / 3;
-            canvasHeight = canvasWidth;
-            canvas = createCanvas(canvasWidth, canvasHeight);
-            canvas.parent("canvas-container");
-            loadImageSize();
-            maxZoom = 3; // Establece el máximo zoom permitido
-        }
-
-        function draw() {
-            background(255);
-            img.loadPixels();
-            let pixelSize = 5;
-
-            for (let y = 0; y < img.height; y += pixelSize) {
-                for (let x = 0; x < img.width; x += pixelSize) {
-                    let pix = getAverageColor(img, x, y, pixelSize);
-                    let index = floor(map(pix, 0, 255, 0, emojis.length));
-                    let mosaicImage = emojis[index];
-
-                    image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
-                }
-            }
-        }
-
-        function getAverageColor(img, x, y, size) {
-            let total = 0;
-            let count = 0;
-
-            for (let j = 0; j < size; j++) {
-                for (let i = 0; i < size; i++) {
-                    let index = (x + i + (y + j) * img.width) * 4;
-                    let r = img.pixels[index];
-                    let g = img.pixels[index + 1];
-                    let b = img.pixels[index + 2];
-                    total += (r + g + b) / 3;
-                    count++;
-                }
-            }
-
-            return total / count;
-        }
-
-        function loadImageSize() {
-            img.loadPixels();
-            let imgRatio = img.width / img.height;
-            if (imgRatio > 1) {
-                canvasHeight = canvasWidth / imgRatio;
-            } else {
-                canvasWidth = canvasHeight * imgRatio;
-            }
-            resizeCanvas(canvasWidth, canvasHeight);
-        }
-
-        function windowResized() {
-            canvasWidth = min(windowWidth, windowHeight) / 3;
-            loadImageSize();
-        }
-
-        function mouseWheel(event) {
-            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                zoom -= event.delta * 0.01;
-                zoom = constrain(zoom, minZoom, maxZoom);
-                return false;
-            }
-        }
-    </script>
 </body>
 </html>
