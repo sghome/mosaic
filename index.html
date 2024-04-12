@@ -12,10 +12,11 @@
             padding: 0;
             width: 100%;
             height: 100%;
+            overflow: hidden; /* Evitar barras de desplazamiento */
         }
 
         #canvas-container {
-            position: relative; /* Establecemos el contenedor como relativo */
+            position: relative;
             width: 100%;
             height: 100%;
         }
@@ -25,31 +26,34 @@
             max-height: 100%;
             border-radius: 10px;
             box-shadow: 0 1px 5px #00000099;
-            pointer-events: none; /* Evitar eventos de clic/touch en el canvas */
-            position: absolute; /* Establecemos el canvas como absoluto */
-            top: 50%; /* Lo posicionamos en el 50% del contenedor verticalmente */
-            left: 50%; /* Lo posicionamos en el 50% del contenedor horizontalmente */
-            transform: translate(-50%, -50%); /* Centramos el canvas */
-            z-index: 1; /* Aseguramos que esté por encima del fondo de AR */
+            pointer-events: none;
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 1;
         }
 
         #defaultCanvas1 {
-            position: absolute; /* Establecemos el canvas como absoluto */
-            top: 50%; /* Lo posicionamos en el 50% del contenedor verticalmente */
-            left: 50%; /* Lo posicionamos en el 50% del contenedor horizontalmente */
-            transform: translate(-50%, -50%); /* Centramos el canvas */
-            z-index: 2; /* Aseguramos que esté por encima del canvas anterior */
+            position: absolute;
+            top: 0;
+            left: 0;
+            z-index: 2;
         }
 
         a-scene {
             width: 100%;
             height: 100%;
+            position: absolute;
+            top: 0;
+            left: 0;
         }
 
         canvas.a-canvas {
-            position: absolute; /* Establecemos el canvas de AR como absoluto */
+            position: absolute;
             top: 0;
             left: 0;
+            z-index: 0; /* Asegurar que esté detrás de los otros elementos */
         }
     </style>
 </head>
