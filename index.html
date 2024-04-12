@@ -41,22 +41,14 @@
 </head>
 <body style="margin: 0;">
     <div id="canvas-container">
-        <a-scene
-            vr-mode-ui="enabled: false;"
-            loading-screen="enabled: false;"
-            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
-            id="scene"
-            embedded
-            gesture-detector
-        >
+        <a-scene>
             <a-entity camera></a-entity>
-            <a-entity environment="preset: forest"></a-entity>
             <a-marker-camera>
                 <!-- Contenido del marker -->
-                <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
-                    <!-- Contenido de la cámara posterior -->
+
+          
                     <canvas id="defaultCanvas0"></canvas>
-                </a-entity>
+
             </a-marker-camera>
         </a-scene>
 
