@@ -38,7 +38,7 @@
             let emojis = [];
             let zoom = 1; // Zoom inicial
             let minZoom = 0.5; // Zoom mínimo
-            let maxZoom = 5; // Zoom máximo aumentado
+            let maxZoom; // Zoom máximo
             let canvasWidth, canvasHeight;
             let canvas; // Variable para almacenar el canvas
 
@@ -57,14 +57,13 @@
                 canvas = createCanvas(canvasWidth, canvasHeight);
                 canvas.parent("canvas-container");
                 loadImageSize();
-                // maxZoom = 3; // Establece el máximo zoom permitido
+                maxZoom = 3; // Establece el máximo zoom permitido
             }
 
             function draw() {
                 background(255);
                 img.loadPixels();
                 let pixelSize = 5;
-             
 
                 for (let y = 0; y < img.height; y += pixelSize) {
                     for (let x = 0; x < img.width; x += pixelSize) {
