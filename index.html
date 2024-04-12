@@ -1,150 +1,143 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
-  <script src="https://hammerjs.github.io/dist/hammer.min.js"></script>
-  <style>
-    #canvas-container {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      width: 100vw;
-      height: 100vh;
-      margin: 0;
-      overflow: hidden; /* Para asegurar que el canvas no se desborde en dispositivos móviles */
-      position: relative; /* Para poder superponer el lienzo sobre el fondo de la cámara */
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zoom con Scroll y Cámara Posterior</title>
+    <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
+    <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <style>
+        #canvas-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            width: 100vw;
+            height: 100vh;
+            margin: 0;
+            overflow: hidden;
+            position: relative;
+        }
 
-    #ar-video {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      object-fit: cover;
-      z-index: -1; /* Para colocar el video detrás del lienzo */
-    }
-
-    canvas {
-      max-width: 100%; /* Hace que el canvas sea responsive */
-      max-height: 100%; /* Hace que el canvas sea responsive */
-      border-radius: 10px;
-      box-shadow: 0 1px 5px #00000099;
-    }
-  </style>
+        canvas {
+            max-width: 100%;
+            max-height: 100%;
+            border-radius: 10px;
+            box-shadow: 0 1px 5px #00000099;
+        }
+    </style>
 </head>
 <body style="margin: 0;">
-  <div id="canvas-container">
-    <video id="ar-video" autoplay playsinline></video>
-    <script>
-      var img;
-      var emojis = [];
-      var zoom = 1; // Zoom inicial
-      var minZoom = 0.5; // Zoom mínimo
-      var maxZoom; // Variable para almacenar el máximo zoom permitido
-      var canvasWidth, canvasHeight;
-      var mc;
+    <div id="canvas-container">
+        <a-scene
+            vr-mode-ui="enabled: false;"
+            loading-screen="enabled: false;"
+            arjs="trackingMethod: best; sourceType: webcam; debugUIEnabled: false;"
+            id="scene"
+            embedded
+            gesture-detector
+        >
+            <a-entity camera></a-entity>
+            <a-entity environment="preset: forest"></a-entity>
+            <a-marker-camera
+                type="pattern"
+                preset="custom"
+                url="assets/marker.patt"
+                raycaster="objects: .clickable"
+                emitevents="true"
+                cursor="fuse: false; rayOrigin: mouse;"
+                id="markerA"
+            >
+                <!-- Contenido del marker -->
+                <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
+                    <!-- Contenido de la cámara posterior -->
+                </a-entity>
+            </a-marker-camera>
+        </a-scene>
 
-      function preload() {
-        img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
-        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
-        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/434648224_348427008157091_217330225043198393_n.jpg"));
-        // Agrega el resto de las imágenes aquí de manera similar
-        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
-        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
-        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
-        emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
-      }
+        <script>
+            let img;
+            let emojis = [];
+            let zoom = 1; // Zoom inicial
+            let minZoom = 0.5; // Zoom mínimo
+            let maxZoom; // Zoom máximo
+            let canvasWidth, canvasHeight;
 
-      function setup() {
-        canvasWidth = min(windowWidth, windowHeight) / 3; // Toma el tamaño mínimo entre el ancho y el alto de la ventana
-        canvasHeight = canvasWidth;
-        var canvas = createCanvas(canvasWidth, canvasHeight); // Crea el canvas
-        canvas.parent("canvas-container");
-        loadImageSize();
+            function preload() {
+                img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/13706833_1813943348839850_764687113_a.jpg"));
+                emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/429311705_779736447350065_4516433906161515358_n.jpg"));
+            }
 
-        // Configura el reconocimiento de gestos táctiles con Hammer.js
-        mc = new Hammer(canvas.elt);
-        mc.get('pinch').set({ enable: true });
-        mc.on('pinch', function (event) {
-          var newZoom = zoom * event.scale;
-          zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
-          return false; // Evita el comportamiento predeterminado del gesto
-        });
+            function setup() {
+                canvasWidth = min(windowWidth, windowHeight) / 3;
+                canvasHeight = canvasWidth;
+                let canvas = createCanvas(canvasWidth, canvasHeight);
+                canvas.parent("content");
+                loadImageSize();
+                maxZoom = 3; // Establece el máximo zoom permitido
+            }
 
-        // Inicializa el fondo de la cámara web
-        var video = document.getElementById('ar-video');
-        navigator.mediaDevices.getUserMedia({ video: { facingMode: 'environment' } }).then(function (stream) {
-          video.srcObject = stream;
-          video.play();
-        }).catch(function (err) {
-          console.error('Error al acceder a la cámara web: ', err);
-        });
-      }
+            function draw() {
+                background(255);
+                img.loadPixels();
+                let pixelSize = 5;
 
-      function draw() {
-        background(255);
-        img.loadPixels();
+                for (let y = 0; y < img.height; y += pixelSize) {
+                    for (let x = 0; x < img.width; x += pixelSize) {
+                        let pix = getAverageColor(img, x, y, pixelSize);
+                        let index = floor(map(pix, 0, 255, 0, emojis.length));
+                        let mosaicImage = emojis[index];
 
-        var pixelSize = 5; // Tamaño de cada pixel
-        var offsetX = (canvasWidth - img.width * zoom) / 2;
-        var offsetY = (canvasHeight - img.height * zoom) / 2;
+                        image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
+                    }
+                }
+            }
 
-        for (var y = 0; y < img.height; y += pixelSize) {
-          for (var x = 0; x < img.width; x += pixelSize) {
-            var pix = getAverageColor(img, x, y, pixelSize);
-            var index = floor(map(pix, 0, 255, 0, emojis.length));
-            var mosaicImage = emojis[index];
+            function getAverageColor(img, x, y, size) {
+                let total = 0;
+                let count = 0;
 
-            // Dibuja la imagen de mosaico
-            image(mosaicImage, x * zoom + offsetX, y * zoom + offsetY, pixelSize * zoom, pixelSize * zoom);
-          }
-        }
-      }
+                for (let j = 0; j < size; j++) {
+                    for (let i = 0; i < size; i++) {
+                        let index = (x + i + (y + j) * img.width) * 4;
+                        let r = img.pixels[index];
+                        let g = img.pixels[index + 1];
+                        let b = img.pixels[index + 2];
+                        let brightness = (r + g + b) / 3;
+                        total += brightness;
+                        count++;
+                    }
+                }
 
-      // Función para obtener el color promedio de un cuadro de píxeles
-      function getAverageColor(img, x, y, size) {
-        var total = 0;
-        var count = 0;
+                return total / count;
+            }
 
-        // Itera sobre los píxeles del cuadro
-        for (var j = 0; j < size; j++) {
-          for (var i = 0; i < size; i++) {
-            var index = (x + i + (y + j) * img.width) * 4;
-            var r = img.pixels[index];
-            var g = img.pixels[index + 1];
-            var b = img.pixels[index + 2];
-            var brightness = (r + g + b) / 3;
-            total += brightness;
-            count++;
-          }
-        }
+            function loadImageSize() {
+                img.loadPixels();
+                let imgRatio = img.width / img.height;
+                if (imgRatio > 1) {
+                    canvasHeight = canvasWidth / imgRatio;
+                } else {
+                    canvasWidth = canvasHeight * imgRatio;
+                }
+                resizeCanvas(canvasWidth, canvasHeight);
+            }
 
-        // Retorna el color promedio del cuadro
-        return total / count;
-      }
+            function windowResized() {
+                canvasWidth = min(windowWidth, windowHeight) / 3;
+                loadImageSize();
+            }
 
-      // Función para cargar la imagen conociendo su tamaño
-      function loadImageSize() {
-        maxZoom = 3; // Establece el máximo zoom permitido
-        img.loadPixels();
-        var imgRatio = img.width / img.height;
-        if (imgRatio > 1) {
-          // La imagen es más ancha que alta
-          canvasHeight = canvasWidth / imgRatio;
-        } else {
-          // La imagen es más alta que ancha
-          canvasWidth = canvasHeight * imgRatio;
-        }
-        resizeCanvas(canvasWidth, canvasHeight);
-      }
-
-      // Función para redimensionar el canvas cuando cambia el tamaño de la ventana
-      function windowResized() {
-        canvasWidth = min(windowWidth, windowHeight) / 3; // Toma el tamaño mínimo entre el ancho y el alto de la ventana
-        loadImageSize();
-      }
-    </script>
-  </div>
+            function mouseWheel(event) {
+                let delta = event.delta;
+                zoom += delta * 0.001; // Ajusta la velocidad del zoom según el desplazamiento del scroll
+                zoom = constrain(zoom, minZoom, maxZoom); // Limita el zoom al rango definido
+                return false; // Evita el comportamiento predeterminado del scroll
+            }
+        </script>
+    </div>
 </body>
 </html>
