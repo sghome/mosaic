@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Almagua</title>
+    <title>Almagua AR</title>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
@@ -41,6 +41,11 @@
             let maxZoom; // Zoom máximo
             let canvasWidth, canvasHeight;
             let canvas; // Variable para almacenar el canvas
+            let offsetX = 0; // Desplazamiento X de la imagen
+            let offsetY = 0; // Desplazamiento Y de la imagen
+            let lastMouseX; // Última posición X del mouse al arrastrar
+            let lastMouseY; // Última posición Y del mouse al arrastrar
+            let isDragging = false; // Indicador de si se está arrastrando
 
             function preload() {
                 img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
@@ -66,8 +71,8 @@
                 let pixelSize = 5;
 
                 // Calcular el desplazamiento necesario para centrar la imagen
-                let offsetX = (canvasWidth - img.width * zoom) / 2;
-                let offsetY = (canvasHeight - img.height * zoom) / 2;
+                offsetX = constrain(offsetX, -(img.width * zoom - canvasWidth), 0);
+                offsetY = constrain(offsetY, -(img.height * zoom - canvasHeight), 0);
 
                 for (let y = 0; y < img.height; y += pixelSize) {
                     for (let x = 0; x < img.width; x += pixelSize) {
@@ -75,7 +80,7 @@
                         let index = floor(map(pix, 0, 255, 0, emojis.length));
                         let mosaicImage = emojis[index];
 
-                        // Ajustar la posición para centrar la imagen
+                        // Ajustar la posición para centrar la imagen y considerar el desplazamiento
                         let posX = x * zoom + offsetX;
                         let posY = y * zoom + offsetY;
 
@@ -124,6 +129,29 @@
                     zoom = constrain(zoom, minZoom, maxZoom);
                     return false;
                 }
+            }
+
+            function mousePressed() {
+                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                    lastMouseX = mouseX;
+                    lastMouseY = mouseY;
+                    isDragging = true;
+                }
+            }
+
+            function mouseDragged() {
+                if (isDragging) {
+                    let deltaX = mouseX - lastMouseX;
+                    let deltaY = mouseY - lastMouseY;
+                    offsetX += deltaX;
+                    offsetY += deltaY;
+                    lastMouseX = mouseX;
+                    lastMouseY = mouseY;
+                }
+            }
+
+            function mouseReleased() {
+                isDragging = false;
             }
         </script>
     </a-scene>
