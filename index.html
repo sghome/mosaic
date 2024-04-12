@@ -48,8 +48,6 @@
 </head>
 <body>
     <a-scene id="canvas-container" id="glow" style="height: 100%; width: 100%;">
-       
-            
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
             let img;
@@ -240,6 +238,36 @@
             canvasContainer.addEventListener('mouseleave', () => {
                 document.removeEventListener('mousemove', rotateToMouse);
             });
+        </script>
+        <!-- Vertex Shader -->
+        <script id="vertex-shader" type="x-shader/x-vertex">
+            attribute vec3 position;
+            attribute vec3 normal;
+            attribute vec2 uv;
+            uniform mat4 modelViewMatrix;
+            uniform mat4 projectionMatrix;
+            varying vec3 vNormal;
+            varying vec2 vUv;
+            void main() {
+                vNormal = normal;
+                vUv = uv;
+                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
+            }
+        </script>
+
+        <!-- Fragment Shader -->
+        <script id="fragment-shader" type="x-shader/x-fragment">
+            precision highp float;
+            varying vec3 vNormal;
+            varying vec2 vUv;
+            uniform float uTime;
+            uniform sampler2D texture;
+            void main() {
+                vec2 uv = vUv;
+                uv.y += sin(uTime * 0.1 + uv.x * 5.0) * 0.01; // Modificar la posición vertical de los píxeles
+                uv.x += sin(uTime * 0.1 + uv.y * 5.0) * 0.01; // Modificar la posición horizontal de los píxeles
+                gl_FragColor = texture2D(texture, uv);
+            }
         </script>
     </a-scene>
 </body>
