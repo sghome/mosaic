@@ -77,8 +77,7 @@
             }
 
             function setup() {
-                canvasWidth = img.width; // Tamaño del canvas igual al tamaño de la imagen
-                canvasHeight = img.height;
+                calculateCanvasSize(); // Calcular el tamaño del canvas
                 canvas = createCanvas(canvasWidth, canvasHeight);
                 canvas.parent("canvas-container");
             }
@@ -141,6 +140,31 @@
 
             function mouseReleased() {
                 isDragging = false;
+            }
+
+            function calculateCanvasSize() {
+                let baseSize = min(windowWidth, windowHeight) * 0.8; // Tamaño base adecuado para dispositivos móviles
+                let aspectRatio = img.width / img.height;
+
+                if (windowWidth > windowHeight) {
+                    canvasWidth = baseSize;
+                    canvasHeight = baseSize / aspectRatio;
+                } else {
+                    canvasHeight = baseSize;
+                    canvasWidth = baseSize * aspectRatio;
+                }
+
+                // Ajustar zoom inicial
+                zoom = min(canvasWidth / img.width, canvasHeight / img.height);
+                
+                // Ajustar offset para centrar la imagen
+                offsetX = (canvasWidth - img.width * zoom) / 2;
+                offsetY = (canvasHeight - img.height * zoom) / 2;
+            }
+
+            function windowResized() {
+                calculateCanvasSize();
+                resizeCanvas(canvasWidth, canvasHeight);
             }
         </script>
     </a-scene>
