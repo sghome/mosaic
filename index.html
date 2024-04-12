@@ -56,7 +56,7 @@
                 <!-- Contenido del marker -->
                 <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
                     <!-- Contenido de la cámara posterior -->
-                    <canvas id="defaultCanvas0"></canvas>
+              
                 </a-entity>
             </a-marker-camera>
         </a-scene>
@@ -138,9 +138,11 @@
             }
 
             function mouseWheel(event) {
-                zoom -= event.delta * 0.01;
-                zoom = constrain(zoom, minZoom, maxZoom);
-                return false;
+                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                    zoom -= event.delta * 0.01;
+                    zoom = constrain(zoom, minZoom, maxZoom);
+                    return false;
+                }
             }
         </script>
     </div>
