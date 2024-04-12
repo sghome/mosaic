@@ -14,7 +14,18 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background-color: black; /* Fondo negro */
+            background: black; /* Fondo negro */
+            position: relative;
+        }
+
+        #video {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: -1; /* Colocar el video detrás del canvas */
         }
 
         #canvas-container {
@@ -22,6 +33,9 @@
             width: 100%;
             height: 100%;
             overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
 
         canvas {
@@ -31,7 +45,7 @@
     </style>
 </head>
 <body>
-    <video id="video" autoplay style="display: none;"></video>
+    <video id="video" autoplay></video>
     <div id="canvas-container">
         <canvas id="canvas"></canvas>
     </div>
@@ -87,7 +101,6 @@
         }
 
         function draw() {
-            background(0);
             img.loadPixels();
             let pixelSize = 5;
 
@@ -108,12 +121,6 @@
                     image(mosaicImage, posX, posY, pixelSize * zoom, pixelSize * zoom);
                 }
             }
-
-            // Dibujar el video de la cámara como fondo
-            let video = document.getElementById('video');
-            let canvasElement = document.getElementById('canvas');
-            let ctx = canvasElement.getContext('2d');
-            ctx.drawImage(video, 0, 0, canvasWidth, canvasHeight);
         }
 
         function getAverageColor(img, x, y, size) {
@@ -148,40 +155,6 @@
         function windowResized() {
             canvasWidth = min(windowWidth, windowHeight) / 3;
             loadImageSize();
-        }
-
-        function mouseWheel(event) {
-            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                zoom -= event.delta * 0.01;
-                zoom = constrain(zoom, minZoom, maxZoom);
-                return false;
-            }
-        }
-
-        function mousePressed() {
-            // Iniciar el arrastre de la imagen al presionar el mouse
-            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                isDragging = true;
-                lastMouseX = mouseX;
-                lastMouseY = mouseY;
-            }
-        }
-
-        function mouseDragged() {
-            // Actualizar el desplazamiento de la imagen mientras se arrastra el mouse
-            if (isDragging) {
-                let deltaX = mouseX - lastMouseX;
-                let deltaY = mouseY - lastMouseY;
-                offsetX += deltaX;
-                offsetY += deltaY;
-                lastMouseX = mouseX;
-                lastMouseY = mouseY;
-            }
-        }
-
-        function mouseReleased() {
-            // Detener el arrastre de la imagen al soltar el mouse
-            isDragging = false;
         }
     </script>
 </body>
