@@ -45,6 +45,7 @@
         canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
+            background-color: transparent !important; /* Establecer el fondo transparente */
         }
 
         .a-enter-vr-button, .a-enter-ar-button {
@@ -89,9 +90,12 @@
                 // Ajustar offsetX y offsetY para centrar la imagen
                 offsetX = (canvasWidth - img.width * zoom) / 2;
                 offsetY = (canvasHeight - img.height * zoom) / 2;
+
+                // Dibujar la imagen solo después de que esté completamente cargada
+                drawImage();
             }
 
-            function draw() {
+            function drawImage() {
                 background(255);
                 img.loadPixels();
                 let pixelSize = 5;
@@ -147,6 +151,7 @@
             function windowResized() {
                 canvasWidth = min(windowWidth, windowHeight) * 0.8; // Actualizar el tamaño del canvas al cambiar el tamaño de la ventana
                 loadImageSize();
+                redraw(); // Redibujar la imagen cuando se cambie el tamaño de la ventana
             }
 
             function mouseWheel(event) {
