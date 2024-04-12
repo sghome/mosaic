@@ -22,19 +22,20 @@
             height: 100vh;
             overflow: hidden;
             position: relative;
-            background: #000; /* Añade un fondo negro */
         }
 
         canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
+            background: transparent; /* Hacer el fondo del canvas transparente */
         }
     </style>
 </head>
 <body>
-    <div id="canvas-container">
-        <!-- Este es el contenedor para el canvas generado en p5.js -->
-    </div>
+    <a-scene embedded arjs="sourceType: webcam;">
+        <!-- Código de la escena A-Frame -->
+    </a-scene>
+    <div id="canvas-container"></div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <script>
         let img;
