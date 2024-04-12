@@ -6,6 +6,7 @@
     <title>Zoom con Scroll y Cámara Posterior</title>
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
     <style>
         body, html {
             margin: 0;
@@ -51,9 +52,12 @@
 </head>
 <body>
     <a-scene id="canvas-container" id="glow" style="height: 100%; width: 100%;">
-        <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
             let img;
+            const pointSize = 3.1;
+            let program, renderer;
+            let vertices = [];
+            let colors = [];
             let emojis = [];
             let emojiPositions = [];
             let zoom = 0.5; // Zoom inicial
@@ -68,7 +72,7 @@
             let isDragging = false; // Indicador de si se está arrastrando
 
             function preload() {
-                img = loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/almagua-escuela.jpg");
+                img = loadImage("cacique-bg.png");
                 emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/198845101_989500098492476_3555566408394435419_n.jpg"));
                 emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/333272083_222518770301921_4979215036742286426_n.jpg"));
                 emojis.push(loadImage("https://cdn.glitch.global/c536c49d-7661-4fd9-81b8-918d12539028/1605322805490.jpeg"));
@@ -77,216 +81,135 @@
             }
 
             function setup() {
-                canvasWidth = min(windowWidth, windowHeight) / 3;
-                canvasHeight = canvasWidth;
-                canvas = createCanvas(canvasWidth, canvasHeight, WEBGL); // Establece el canvas en modo WEBGL
-                canvas.parent("canvas-container");
-                loadImageSize();
-                maxZoom = 21; // Establece el máximo zoom permitido
+                renderer = createCanvas(windowWidth, windowHeight, WEBGL);
 
-                // Ajustar offsetX y offsetY para centrar la imagen
-                offsetX = (canvasWidth - img.width * zoom) / 2;
-                offsetY = (canvasHeight - img.height * zoom) / 2;
+                const vert = `
+                    attribute vec3 aPosition;
+                    attribute vec3 aColor;
+                    uniform float uTime;
+                    uniform mat4 uModelViewMatrix;
+                    uniform mat4 uProjectionMatrix;
+                    varying vec4 color;
+                    void main() {
+                        vec3 pos = aPosition;
+                        pos.z *= sin(uTime);
+                        gl_Position = uProjectionMatrix * uModelViewMatrix * vec4(pos, 1.0);
+                        gl_PointSize = 1.0;
+                        color = vec4(aColor, 1.0);
+                    }
+                `;
 
-                // Inicializar posiciones de emojis
-                for (let i = 0; i < emojis.length; i++) {
-                    emojiPositions.push(createVector(random(canvasWidth), random(canvasHeight)));
+                const frag = `
+                    #ifdef GL_ES
+                    precision highp float;
+                    #endif
+                    varying vec4 color;
+                    void main() {
+                        gl_FragColor = color;
+                    }
+                `;
+
+                //load shader
+                var vs = drawingContext.createShader(drawingContext.VERTEX_SHADER);
+                drawingContext.shaderSource(vs, vert);
+                drawingContext.compileShader(vs);
+
+                var fs = drawingContext.createShader(drawingContext.FRAGMENT_SHADER);
+                drawingContext.shaderSource(fs, frag);
+                drawingContext.compileShader(fs);
+
+                //create shader
+                program = drawingContext.createProgram();
+                drawingContext.attachShader(program, vs);
+                drawingContext.attachShader(program, fs);
+                drawingContext.linkProgram(program);
+
+                //validate shader
+                if (!drawingContext.getShaderParameter(vs, drawingContext.COMPILE_STATUS))
+                    console.log(drawingContext.getShaderInfoLog(vs));
+
+                if (!drawingContext.getShaderParameter(fs, drawingContext.COMPILE_STATUS))
+                    console.log(drawingContext.getShaderInfoLog(fs));
+
+                if (!drawingContext.getProgramParameter(program, drawingContext.LINK_STATUS))
+                    console.log(drawingContext.getProgramInfoLog(program));
+
+                //use shader
+                drawingContext.useProgram(program);
+
+                //create uniform pointers
+                program.uModelViewMatrix = drawingContext.getUniformLocation(program, "uModelViewMatrix");
+                program.uProjectionMatrix = drawingContext.getUniformLocation(program, "uProjectionMatrix");
+                program.uTime = drawingContext.getUniformLocation(program, "uTime");
+
+                //enable attributes
+                program.aPosition = drawingContext.getAttribLocation(program, "aPosition");
+                drawingContext.enableVertexAttribArray(program.aPosition);
+
+                program.aColor = drawingContext.getAttribLocation(program, "aColor");
+                drawingContext.enableVertexAttribArray(program.aColor);
+
+                //convert image to buffer data
+                const pointScale = 1;
+                const xAdd = -img.width / 2;
+                const yAdd = -img.height / 2;
+                const zAdd = 0;
+                for (var y = 0, i = 0; y < img.height; y++) {
+                    for (var x = 0; x < img.width; x++) {
+                        const c = img.get(x, y);
+                        const z = random(-1000, 1000);
+                        vertices.push(x * pointScale + xAdd);
+                        vertices.push(y * pointScale + yAdd);
+                        vertices.push(z * pointScale + zAdd);
+
+                        colors.push(c[0] / 255);
+                        colors.push(c[1] / 255);
+                        colors.push(c[2] / 255);
+                    }
+                }
+
+                //create buffers
+                program.positionBuffer = drawingContext.createBuffer();
+                drawingContext.bindBuffer(drawingContext.ARRAY_BUFFER, program.positionBuffer);
+                drawingContext.bufferData(drawingContext.ARRAY_BUFFER, new Float32Array(vertices), drawingContext.STATIC_DRAW);
+
+                program.colorBuffer = drawingContext.createBuffer();
+                drawingContext.bindBuffer(drawingContext.ARRAY_BUFFER, program.colorBuffer);
+                drawingContext.bufferData(drawingContext.ARRAY_BUFFER, new Float32Array(colors), drawingContext.STATIC_DRAW);
+
+                // Preparar posiciones iniciales para los emojis
+                for (let i = 0; i < 1000; i++) {
+                    emojiPositions.push(createVector(random(-width / 2, width / 2), random(-height / 2, height / 2)));
                 }
             }
 
             function draw() {
-                background(255, 0); // Establece el fondo del canvas como transparente
-                img.loadPixels();
-                let pixelSize = 5;
+                background(0);
+                orbitControl();
 
-                // Calcular el desplazamiento necesario para centrar la imagen
-                offsetX = constrain(offsetX, -(img.width * zoom - canvasWidth), 0);
-                offsetY = constrain(offsetY, -(img.height * zoom - canvasHeight), 0);
+                if (vertices.length == 0) return;
 
-                for (let y = 0; y < img.height; y += pixelSize) {
-                    for (let x = 0; x < img.width; x += pixelSize) {
-                        let pix = getAverageColor(img, x, y, pixelSize);
-                        let index = floor(map(pix, 0, 255, 0, emojis.length));
-                        let mosaicImage = emojis[index];
+                drawingContext.useProgram(program);
 
-                        // Ajustar la posición para centrar la imagen y considerar el desplazamiento
-                        let posX = x * zoom + offsetX;
-                        let posY = y * zoom + offsetY;
+                drawingContext.bindBuffer(drawingContext.ARRAY_BUFFER, program.positionBuffer);
+                drawingContext.vertexAttribPointer(program.aPosition, 3, drawingContext.FLOAT, false, 0, 0);
 
-                        // Desplazar emojis
-                        let emojiPos = emojiPositions[index];
-                        emojiPos.x += random(-1, 1);
-                        emojiPos.y += random(-1, 1);
+                drawingContext.bindBuffer(drawingContext.ARRAY_BUFFER, program.colorBuffer);
+                drawingContext.vertexAttribPointer(program.aColor, 3, drawingContext.FLOAT, false, 0, 0);
 
-                        // Wrap around edges
-                        if (emojiPos.x < 0) emojiPos.x += canvasWidth;
-                        if (emojiPos.y < 0) emojiPos.y += canvasHeight;
-                        if (emojiPos.x > canvasWidth) emojiPos.x -= canvasWidth;
-                        if (emojiPos.y > canvasHeight) emojiPos.y -= canvasHeight;
+                drawingContext.uniformMatrix4fv(program.uModelViewMatrix, false, renderer.uMVMatrix.mat4);
+                drawingContext.uniformMatrix4fv(program.uProjectionMatrix, false, renderer.uPMatrix.mat4);
 
-                        image(mosaicImage, emojiPos.x, emojiPos.y, pixelSize * zoom, pixelSize * zoom);
-                    }
+                drawingContext.uniform1f(program.uTime, frameCount / 100);
+
+                drawingContext.drawArrays(drawingContext.POINTS, 0, vertices.length / 3);
+
+                // Dibujar emojis
+                for (let i = 0; i < emojiPositions.length; i++) {
+                    const pos = emojiPositions[i];
+                    const emoji = random(emojis);
+                    image(emoji, pos.x, pos.y, 50, 50);
                 }
-            }
-
-            function getAverageColor(img, x, y, size) {
-                let total = 0;
-                let count = 0;
-
-                for (let j = 0; j < size; j++) {
-                    for (let i = 0; i < size; i++) {
-                        let index = (x + i + (y + j) * img.width) * 4;
-                        let r = img.pixels[index];
-                        let g = img.pixels[index + 1];
-                        let b = img.pixels[index + 2];
-                        total += (r + g + b) / 3;
-                        count++;
-                    }
-                }
-
-                return total / count;
-            }
-
-            function loadImageSize() {
-                img.loadPixels();
-                let imgRatio = img.width / img.height;
-                if (imgRatio > 1) {
-                    canvasHeight = canvasWidth / imgRatio;
-                } else {
-                    canvasWidth = canvasHeight * imgRatio;
-                }
-                resizeCanvas(canvasWidth, canvasHeight);
-            }
-
-            function windowResized() {
-                canvasWidth = min(windowWidth, windowHeight) / 3;
-                loadImageSize();
-            }
-
-            function mouseWheel(event) {
-                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                    zoom -= event.delta * 0.01;
-                    zoom = constrain(zoom, minZoom, maxZoom);
-                    return false;
-                }
-            }
-
-            function mousePressed() {
-                // Iniciar el arrastre de la imagen al presionar el mouse
-                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                    isDragging = true;
-                    lastMouseX = mouseX;
-                    lastMouseY = mouseY;
-                }
-            }
-
-            function mouseDragged() {
-                // Actualizar el desplazamiento de la imagen mientras se arrastra el mouse
-                if (isDragging) {
-                    let deltaX = mouseX - lastMouseX;
-                    let deltaY = mouseY - lastMouseY;
-                    offsetX += deltaX;
-                    offsetY += deltaY;
-                    lastMouseX = mouseX;
-                    lastMouseY = mouseY;
-                }
-            }
-
-            function mouseReleased() {
-                // Detener el arrastre de la imagen al soltar el mouse
-                isDragging = false;
-            }
-
-            const canvasContainer = document.getElementById('canvas-container');
-
-            // Función para ajustar el zoom al desplazarse el scroll
-            function adjustZoomOnScroll(event) {
-                // Obtener la posición del scroll vertical
-                const scrollTop = window.scrollY || window.pageYOffset;
-                
-                // Calcular el zoom basado en la posición del scroll
-                const zoom = 1 + scrollTop * 0.001; // Ajusta el factor de escala según sea necesario
-                
-                // Aplicar el zoom al canvas container
-                canvasContainer.style.transform = `scale(${zoom})`;
-            }
-
-            // Escuchar el evento de desplazamiento del scroll
-            window.addEventListener('scroll', adjustZoomOnScroll);
-
-            // Función para dar movimiento al canvas al pasar el mouse sobre él
-            function rotateToMouse(e) {
-                const mouseX = e.clientX;
-                const mouseY = e.clientY;
-                const leftX = mouseX - bounds.x;
-                const topY = mouseY - bounds.y;
-                const center = {
-                    x: leftX - bounds.width / 2,
-                    y: topY - bounds.height / 2
-                }
-                const distance = Math.sqrt(center.x**2 + center.y**2);
-                
-                canvasContainer.style.transform = `
-                    scale3d(1.07, 1.07, 1.07)
-                    rotate3d(
-                    ${center.y / 100},
-                    ${-center.x / 100},
-                    0,
-                    ${Math.log(distance)* 2}deg
-                    )
-                `;
-                
-                canvasContainer.querySelector('.glow').style.backgroundImage = `
-                    radial-gradient(
-                    circle at
-                    ${center.x * 2 + bounds.width/2}px
-                    ${center.y * 2 + bounds.height/2}px,
-                    #ffffff55,
-                    #0000000f
-                    )
-                `;
-            }
-
-            // Obtener el canvas-container
-            const bounds = canvasContainer.getBoundingClientRect();
-
-            // Escuchar los eventos del mouse
-            canvasContainer.addEventListener('mouseenter', () => {
-                document.addEventListener('mousemove', rotateToMouse);
-            });
-
-            canvasContainer.addEventListener('mouseleave', () => {
-                document.removeEventListener('mousemove', rotateToMouse);
-            });
-        </script>
-        <!-- Vertex Shader -->
-        <script id="vertex-shader" type="x-shader/x-vertex">
-            attribute vec3 position;
-            attribute vec3 normal;
-            attribute vec2 uv;
-            uniform mat4 modelViewMatrix;
-            uniform mat4 projectionMatrix;
-            varying vec3 vNormal;
-            varying vec2 vUv;
-            void main() {
-                vNormal = normal;
-                vUv = uv;
-                gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-            }
-        </script>
-
-        <!-- Fragment Shader -->
-        <script id="fragment-shader" type="x-shader/x-fragment">
-            precision highp float;
-            varying vec3 vNormal;
-            varying vec2 vUv;
-            uniform float uTime;
-            uniform sampler2D texture;
-            void main() {
-                vec2 uv = vUv;
-                uv.y += sin(uTime * 0.1 + uv.x * 5.0) * 0.01; // Modificar la posición vertical de los píxeles
-                uv.x += sin(uTime * 0.1 + uv.y * 5.0) * 0.01; // Modificar la posición horizontal de los píxeles
-                gl_FragColor = texture2D(texture, uv);
             }
         </script>
     </a-scene>
