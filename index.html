@@ -12,6 +12,17 @@
       height: 100vh;
       margin: 0;
       overflow: hidden; /* Para asegurar que el canvas no se desborde en dispositivos móviles */
+      position: relative; /* Para poder superponer el lienzo sobre el fondo de la cámara */
+    }
+
+    #ar-video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      z-index: -1; /* Para colocar el video detrás del lienzo */
     }
 
     canvas {
@@ -24,6 +35,7 @@
 </head>
 <body style="margin: 0;">
   <div id="canvas-container">
+    <video id="ar-video" autoplay playsinline></video>
     <script>
       var img;
       var emojis = [];
@@ -56,6 +68,15 @@
         mc.on('pinch', function (event) {
           var newZoom = zoom * event.scale;
           zoom = constrain(newZoom, minZoom, maxZoom); // Limita el zoom al rango definido
+        });
+
+        // Inicializa el fondo de la cámara web
+        var video = document.getElementById('ar-video');
+        navigator.mediaDevices.getUserMedia({ video: true }).then(function (stream) {
+          video.srcObject = stream;
+          video.play();
+        }).catch(function (err) {
+          console.error('Error al acceder a la cámara web: ', err);
         });
       }
 
