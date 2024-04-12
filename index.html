@@ -7,13 +7,19 @@
     <script src="https://aframe.io/releases/1.0.4/aframe.min.js"></script>
     <script src="https://raw.githack.com/AR-js-org/AR.js/master/aframe/build/aframe-ar.js"></script>
     <style>
+        body, html {
+            margin: 0;
+            padding: 0;
+            width: 100%;
+            height: 100%;
+        }
+
         #canvas-container {
             display: flex;
             justify-content: center;
             align-items: center;
             width: 100vw;
             height: 100vh;
-            margin: 0;
             overflow: hidden;
             position: relative;
         }
@@ -22,6 +28,8 @@
             display: flex;
             justify-content: center;
             align-items: center;
+            width: 100%;
+            height: 100%;
             min-width: 50vw; /* Establece un ancho mínimo para el contenedor */
             min-height: 50vh; /* Establece una altura mínima para el contenedor */
         }
@@ -40,7 +48,7 @@
         }
     </style>
 </head>
-<body style="margin: 0;">
+<body>
     <div id="canvas-container">
         <a-scene
             vr-mode-ui="enabled: false;"
