@@ -24,29 +24,12 @@
             position: relative;
         }
 
-        #content {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            width: 100%;
-            height: 100%;
-            min-width: 50vw; /* Establece un ancho mínimo para el contenedor */
-            min-height: 50vh; /* Establece una altura mínima para el contenedor */
-        }
-
         canvas {
             max-width: 100%;
             max-height: 100%;
             border-radius: 10px;
             box-shadow: 0 1px 5px #00000099;
             pointer-events: none; /* Evitar eventos de clic/touch en el canvas */
-        }
-
-        #content canvas {
-            width: 278.073px; /* Mismo ancho que el canvas original */
-            height: 347.333px; /* Mismo alto que el canvas original */
-            max-width: 100%;
-            max-height: 100%;
         }
     </style>
 </head>
@@ -56,7 +39,7 @@
         <a-marker-camera material="" arjs-anchor="" camera="">
             <!-- Contenido del marker -->
             <div id="canvas-container">
-                
+           
             </div>
         </a-marker-camera>
         <a-entity camera="" position="" wasd-controls="" rotation="" look-controls="" aframe-injected=""></a-entity>
