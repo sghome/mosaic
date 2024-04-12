@@ -79,7 +79,7 @@
             function setup() {
                 canvasWidth = min(windowWidth, windowHeight) / 3;
                 canvasHeight = canvasWidth;
-                canvas = createCanvas(canvasWidth, canvasHeight);
+                canvas = createCanvas(canvasWidth, canvasHeight, WEBGL); // Establece el canvas en modo WEBGL
                 canvas.parent("canvas-container");
                 loadImageSize();
                 maxZoom = 21; // Establece el máximo zoom permitido
@@ -95,7 +95,7 @@
             }
 
             function draw() {
-                background(255);
+                background(255, 0); // Establece el fondo del canvas como transparente
                 img.loadPixels();
                 let pixelSize = 5;
 
@@ -118,9 +118,11 @@
                         emojiPos.x += random(-1, 1);
                         emojiPos.y += random(-1, 1);
 
-                        // Wrap around canvas
-                        emojiPos.x = (emojiPos.x + canvasWidth) % canvasWidth;
-                        emojiPos.y = (emojiPos.y + canvasHeight) % canvasHeight;
+                        // Wrap around edges
+                        if (emojiPos.x < 0) emojiPos.x += canvasWidth;
+                        if (emojiPos.y < 0) emojiPos.y += canvasHeight;
+                        if (emojiPos.x > canvasWidth) emojiPos.x -= canvasWidth;
+                        if (emojiPos.y > canvasHeight) emojiPos.y -= canvasHeight;
 
                         image(mosaicImage, emojiPos.x, emojiPos.y, pixelSize * zoom, pixelSize * zoom);
                     }
