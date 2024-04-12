@@ -89,48 +89,13 @@
                 // Ajustar offsetX y offsetY para centrar la imagen
                 offsetX = (canvasWidth - img.width * zoom) / 2;
                 offsetY = (canvasHeight - img.height * zoom) / 2;
+
+                // Dibujar la imagen solo después de que esté completamente cargada
+                image(img, 0, 0, canvasWidth, canvasHeight);
             }
 
             function draw() {
-                background(255);
-                img.loadPixels();
-                let pixelSize = 5;
-
-                // Calcular el desplazamiento necesario para centrar la imagen
-                offsetX = constrain(offsetX, -(img.width * zoom - canvasWidth), 0);
-                offsetY = constrain(offsetY, -(img.height * zoom - canvasHeight), 0);
-
-                for (let y = 0; y < img.height; y += pixelSize) {
-                    for (let x = 0; x < img.width; x += pixelSize) {
-                        let pix = getAverageColor(img, x, y, pixelSize);
-                        let index = floor(map(pix, 0, 255, 0, emojis.length));
-                        let mosaicImage = emojis[index];
-
-                        // Ajustar la posición para centrar la imagen y considerar el desplazamiento
-                        let posX = x * zoom + offsetX;
-                        let posY = y * zoom + offsetY;
-
-                        image(mosaicImage, posX, posY, pixelSize * zoom, pixelSize * zoom);
-                    }
-                }
-            }
-
-            function getAverageColor(img, x, y, size) {
-                let total = 0;
-                let count = 0;
-
-                for (let j = 0; j < size; j++) {
-                    for (let i = 0; i < size; i++) {
-                        let index = (x + i + (y + j) * img.width) * 4;
-                        let r = img.pixels[index];
-                        let g = img.pixels[index + 1];
-                        let b = img.pixels[index + 2];
-                        total += (r + g + b) / 3;
-                        count++;
-                    }
-                }
-
-                return total / count;
+                // Esta función ya no es necesaria ya que todo el dibujo se hace en setup()
             }
 
             function loadImageSize() {
