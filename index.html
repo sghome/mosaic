@@ -71,7 +71,7 @@
                         let index = floor(map(pix, 0, 255, 0, emojis.length));
                         let mosaicImage = emojis[index];
 
-                        image(mosaicImage, (x - img.width / 2) * zoom + canvasWidth / 2, (y - img.height / 2) * zoom + canvasHeight / 2, pixelSize * zoom, pixelSize * zoom);
+                        image(mosaicImage, x * zoom, y * zoom, pixelSize * zoom, pixelSize * zoom);
                     }
                 }
             }
