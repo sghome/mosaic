@@ -38,15 +38,7 @@
         >
             <a-entity camera></a-entity>
             <a-entity environment="preset: forest"></a-entity>
-            <a-marker-camera
-                type="pattern"
-                preset="custom"
-                url="assets/marker.patt"
-                raycaster="objects: .clickable"
-                emitevents="true"
-                cursor="fuse: false; rayOrigin: mouse;"
-                id="markerA"
-            >
+            <a-marker-camera>
                 <!-- Contenido del marker -->
                 <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
                     <!-- Contenido de la cámara posterior -->
