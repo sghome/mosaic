@@ -14,7 +14,6 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            background: black; /* Fondo negro */
             position: relative;
         }
 
@@ -155,6 +154,40 @@
         function windowResized() {
             canvasWidth = min(windowWidth, windowHeight) / 3;
             loadImageSize();
+        }
+
+        function mouseWheel(event) {
+            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                zoom -= event.delta * 0.01;
+                zoom = constrain(zoom, minZoom, maxZoom);
+                return false;
+            }
+        }
+
+        function mousePressed() {
+            // Iniciar el arrastre de la imagen al presionar el mouse
+            if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
+                isDragging = true;
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+            }
+        }
+
+        function mouseDragged() {
+            // Actualizar el desplazamiento de la imagen mientras se arrastra el mouse
+            if (isDragging) {
+                let deltaX = mouseX - lastMouseX;
+                let deltaY = mouseY - lastMouseY;
+                offsetX += deltaX;
+                offsetY += deltaY;
+                lastMouseX = mouseX;
+                lastMouseY = mouseY;
+            }
+        }
+
+        function mouseReleased() {
+            // Detener el arrastre de la imagen al soltar el mouse
+            isDragging = false;
         }
     </script>
 </body>
