@@ -45,7 +45,6 @@
         canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
-            background-color: transparent !important; /* Establecer el fondo transparente */
         }
 
         .a-enter-vr-button, .a-enter-ar-button {
@@ -59,9 +58,7 @@
         <script>
             let img;
             let emojis = [];
-            let zoom = 0.5; // Zoom inicial
-            let minZoom = 0.5; // Zoom mínimo
-            let maxZoom; // Zoom máximo
+            let zoom = 1; // Zoom inicial
             let canvasWidth, canvasHeight;
             let canvas; // Variable para almacenar el canvas
             let offsetX = 0; // Desplazamiento X de la imagen
@@ -80,29 +77,16 @@
             }
 
             function setup() {
-                canvasWidth = min(windowWidth, windowHeight) * 0.8; // Actualizar el tamaño del canvas al cambiar el tamaño de la ventana
-                canvasHeight = canvasWidth;
+                canvasWidth = img.width; // Tamaño del canvas igual al tamaño de la imagen
+                canvasHeight = img.height;
                 canvas = createCanvas(canvasWidth, canvasHeight);
                 canvas.parent("canvas-container");
-                loadImageSize();
-                maxZoom = 21; // Establece el máximo zoom permitido
-
-                // Ajustar offsetX y offsetY para centrar la imagen
-                offsetX = (canvasWidth - img.width * zoom) / 2;
-                offsetY = (canvasHeight - img.height * zoom) / 2;
-
-                // Dibujar la imagen solo después de que esté completamente cargada
-                drawImage();
             }
 
-            function drawImage() {
+            function draw() {
                 background(255);
                 img.loadPixels();
                 let pixelSize = 5;
-
-                // Calcular el desplazamiento necesario para centrar la imagen
-                offsetX = constrain(offsetX, -(img.width * zoom - canvasWidth), 0);
-                offsetY = constrain(offsetY, -(img.height * zoom - canvasHeight), 0);
 
                 for (let y = 0; y < img.height; y += pixelSize) {
                     for (let x = 0; x < img.width; x += pixelSize) {
@@ -110,7 +94,6 @@
                         let index = floor(map(pix, 0, 255, 0, emojis.length));
                         let mosaicImage = emojis[index];
 
-                        // Ajustar la posición para centrar la imagen y considerar el desplazamiento
                         let posX = x * zoom + offsetX;
                         let posY = y * zoom + offsetY;
 
@@ -137,33 +120,7 @@
                 return total / count;
             }
 
-            function loadImageSize() {
-                img.loadPixels();
-                let imgRatio = img.width / img.height;
-                if (imgRatio > 1) {
-                    canvasHeight = canvasWidth / imgRatio;
-                } else {
-                    canvasWidth = canvasHeight * imgRatio;
-                }
-                resizeCanvas(canvasWidth, canvasHeight);
-            }
-
-            function windowResized() {
-                canvasWidth = min(windowWidth, windowHeight) * 0.8; // Actualizar el tamaño del canvas al cambiar el tamaño de la ventana
-                loadImageSize();
-                redraw(); // Redibujar la imagen cuando se cambie el tamaño de la ventana
-            }
-
-            function mouseWheel(event) {
-                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
-                    zoom -= event.delta * 0.01;
-                    zoom = constrain(zoom, minZoom, maxZoom);
-                    return false;
-                }
-            }
-
             function mousePressed() {
-                // Iniciar el arrastre de la imagen al presionar el mouse
                 if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
                     isDragging = true;
                     lastMouseX = mouseX;
@@ -172,7 +129,6 @@
             }
 
             function mouseDragged() {
-                // Actualizar el desplazamiento de la imagen mientras se arrastra el mouse
                 if (isDragging) {
                     let deltaX = mouseX - lastMouseX;
                     let deltaY = mouseY - lastMouseY;
@@ -184,25 +140,8 @@
             }
 
             function mouseReleased() {
-                // Detener el arrastre de la imagen al soltar el mouse
                 isDragging = false;
             }
-
-            // Eliminar el texto "Loading..."
-            window.onload = function() {
-                var loadingText = document.querySelector('.a-canvas-loading');
-                if (loadingText) {
-                    loadingText.parentNode.removeChild(loadingText);
-                }
-            };
-
-            // Eliminar el botón de AR
-            window.onload = function() {
-                var arButton = document.querySelector('.a-enter-ar-button');
-                if (arButton) {
-                    arButton.parentNode.removeChild(arButton);
-                }
-            };
         </script>
     </a-scene>
 </body>
