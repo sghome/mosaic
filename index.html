@@ -36,8 +36,8 @@
         <script>
             let img;
             let emojis = [];
-            let zoom = 0; // Zoom inicial
-            let minZoom = 1.5; // Zoom mínimo
+            let zoom = 1; // Zoom inicial
+            let minZoom = 0.5; // Zoom mínimo
             let maxZoom; // Zoom máximo
             let canvasWidth, canvasHeight;
             let canvas; // Variable para almacenar el canvas
@@ -63,7 +63,7 @@
             function draw() {
                 background(255);
                 img.loadPixels();
-                let pixelSize = 9;
+                let pixelSize = 5;
 
                 for (let y = 0; y < img.height; y += pixelSize) {
                     for (let x = 0; x < img.width; x += pixelSize) {
@@ -103,6 +103,7 @@
                     canvasWidth = canvasHeight * imgRatio;
                 }
                 resizeCanvas(canvasWidth, canvasHeight);
+                zoom = 1; // Establecer el zoom inicial a 1
             }
 
             function windowResized() {
