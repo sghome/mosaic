@@ -32,16 +32,6 @@
             height: 100%;
             min-width: 50vw; /* Establece un ancho mínimo para el contenedor */
             min-height: 50vh; /* Establece una altura mínima para el contenedor */
-            position: relative; /* Agregamos posición relativa */
-        }
-
-        #canvas-wrapper {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            position: absolute; /* Posición absoluta para centrar el canvas */
-            width: 100%;
-            height: 100%;
         }
 
         canvas {
@@ -72,9 +62,8 @@
             <a-marker-camera>
                 <!-- Contenido del marker -->
                 <a-entity id="content" position="0 0 -1" rotation="-90 0 0" scale="3 3 3">
-                    <div id="canvas-wrapper"> <!-- Contenedor adicional para el canvas -->
-                        <canvas></canvas>
-                    </div>
+                    <!-- Contenido de la cámara posterior -->
+                  
                 </a-entity>
             </a-marker-camera>
         </a-scene>
@@ -100,7 +89,7 @@
                 canvasWidth = min(windowWidth, windowHeight) / 3;
                 canvasHeight = canvasWidth;
                 let canvas = createCanvas(canvasWidth, canvasHeight);
-                canvas.parent("canvas-wrapper"); // Establecer el contenedor canvas-wrapper como padre
+                canvas.parent("content");
                 loadImageSize();
                 maxZoom = 3; // Establece el máximo zoom permitido
             }
@@ -156,11 +145,7 @@
             }
 
             function mouseWheel(event) {
-                let canvasX = (windowWidth - canvasWidth) / 2; // Obtener la posición x del canvas
-                let canvasY = (windowHeight - canvasHeight) / 2; // Obtener la posición y del canvas
-
-                // Verificar si el mouse está dentro del área del canvas
-                if (mouseX >= canvasX && mouseX <= canvasX + canvasWidth && mouseY >= canvasY && mouseY <= canvasY + canvasHeight) {
+                if (mouseX >= 0 && mouseX <= width && mouseY >= 0 && mouseY <= height) {
                     zoom -= event.delta * 0.01;
                     zoom = constrain(zoom, minZoom, maxZoom);
                     return false;
