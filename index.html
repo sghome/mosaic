@@ -43,20 +43,23 @@
         canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
             box-shadow: 0px 0px 20px 0px rgba(0,0,0,0.75); /* Efecto de sombra */
+            display: block;
+            width: 100vw;
+            height: 100vh;
         }
     </style>
 </head>
 <body>
     <a-scene id="canvas-container" id="glow" style="height: 100%; width: 100%;">
-       
+        <canvas id="defaultCanvas0" class="p5Canvas" style="display: block; width: 100vw; height: 100vh;"></canvas>
             
         <script src="https://cdnjs.cloudflare.com/ajax/libs/p5.js/1.4.0/p5.js"></script>
         <script>
             let img;
             let emojis = [];
-            let zoom = 0.5; // Zoom inicial
+            let zoom = 0.8; // Zoom inicial
             let minZoom = 0.5; // Zoom mínimo
-            let maxZoom; // Zoom máximo
+            let maxZoom = 30; // Zoom máximo
             let canvasWidth, canvasHeight;
             let canvas; // Variable para almacenar el canvas
             let offsetX = 0; // Desplazamiento X de la imagen
@@ -76,9 +79,6 @@
 
             function setup() {
                 canvasWidth = min(windowWidth, windowHeight) / 3;
-                canvasHeight = canvasWidth;
-                canvas = createCanvas(canvasWidth, canvasHeight);
-                canvas.parent("canvas-container");
                 loadImageSize();
                 maxZoom = 21; // Establece el máximo zoom permitido
 
