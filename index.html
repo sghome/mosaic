@@ -23,11 +23,22 @@
             overflow: hidden;
             position: relative;
             transition-duration: 150ms;
-    box-shadow: 0 5px 20px 5px #00000044;
-    position: relative; /* Asegúrate de que el contenedor sea relativo para que los efectos de iluminación sean relativos a él */
-
+            box-shadow: 0 5px 20px 5px #00000044;
+            position: relative; /* Asegúrate de que el contenedor sea relativo para que los efectos de iluminación sean relativos a él */
         }
 
+        #canvas-container:hover {
+            box-shadow: 0 5px 20px 5px #00000044;
+        }
+
+        #canvas-container .glow {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            left: 0;
+            top: 0;
+            background-image: radial-gradient(circle at 50% -20%, #ffffff22, #0000000f);
+        }
 
         canvas {
             border-radius: 20px; /* Aplicar bordes circulares al canvas */
@@ -165,6 +176,68 @@
                 // Detener el arrastre de la imagen al soltar el mouse
                 isDragging = false;
             }
+
+            const canvasContainer = document.getElementById('canvas-container');
+
+            // Función para ajustar el zoom al desplazarse el scroll
+            function adjustZoomOnScroll(event) {
+                // Obtener la posición del scroll vertical
+                const scrollTop = window.scrollY || window.pageYOffset;
+                
+                // Calcular el zoom basado en la posición del scroll
+                const zoom = 1 + scrollTop * 0.001; // Ajusta el factor de escala según sea necesario
+                
+                // Aplicar el zoom al canvas container
+                canvasContainer.style.transform = `scale(${zoom})`;
+            }
+
+            // Escuchar el evento de desplazamiento del scroll
+            window.addEventListener('scroll', adjustZoomOnScroll);
+
+            // Función para dar movimiento al canvas al pasar el mouse sobre él
+            function rotateToMouse(e) {
+                const mouseX = e.clientX;
+                const mouseY = e.clientY;
+                const leftX = mouseX - bounds.x;
+                const topY = mouseY - bounds.y;
+                const center = {
+                    x: leftX - bounds.width / 2,
+                    y: topY - bounds.height / 2
+                }
+                const distance = Math.sqrt(center.x**2 + center.y**2);
+                
+                canvasContainer.style.transform = `
+                    scale3d(1.07, 1.07, 1.07)
+                    rotate3d(
+                    ${center.y / 100},
+                    ${-center.x / 100},
+                    0,
+                    ${Math.log(distance)* 2}deg
+                    )
+                `;
+                
+                canvasContainer.querySelector('.glow').style.backgroundImage = `
+                    radial-gradient(
+                    circle at
+                    ${center.x * 2 + bounds.width/2}px
+                    ${center.y * 2 + bounds.height/2}px,
+                    #ffffff55,
+                    #0000000f
+                    )
+                `;
+            }
+
+            // Obtener el canvas-container
+            const bounds = canvasContainer.getBoundingClientRect();
+
+            // Escuchar los eventos del mouse
+            canvasContainer.addEventListener('mouseenter', () => {
+                document.addEventListener('mousemove', rotateToMouse);
+            });
+
+            canvasContainer.addEventListener('mouseleave', () => {
+                document.removeEventListener('mousemove', rotateToMouse);
+            });
         </script>
     </a-scene>
 </body>
